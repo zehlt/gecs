@@ -15,27 +15,27 @@ type ArenaAllocator interface {
 	Exists(Entity) bool
 }
 
-type entityArena struct {
+type arena struct {
 	cells       []EntityCell
 	current_gen uint64
 	first_free  int
 }
 
-func NewEntityArena() ArenaAllocator {
+func NewArena() ArenaAllocator {
 	c := make([]EntityCell, 1)
 
 	c[0] = EntityCell{
 		t: END_CELL,
 	}
 
-	return &entityArena{
+	return &arena{
 		cells:       c,
 		current_gen: 0,
 		first_free:  0,
 	}
 }
 
-func (arena *entityArena) Create() (Entity, error) {
+func (arena *arena) Create() (Entity, error) {
 	e := arena.cells[arena.first_free]
 
 	switch e.t {
@@ -44,7 +44,7 @@ func (arena *entityArena) Create() (Entity, error) {
 			t:          OCCUPIED_CELL,
 			generation: arena.current_gen,
 		}
-		newEntity := Entity{id: arena.first_free, generation: arena.current_gen}
+		newEntity := Entity{Id: arena.first_free, generation: arena.current_gen}
 		arena.first_free = e.next
 
 		return newEntity, nil
@@ -61,34 +61,34 @@ func (arena *entityArena) Create() (Entity, error) {
 		arena.cells = append(arena.cells, EntityCell{t: END_CELL})
 		arena.first_free = size
 
-		return Entity{id: size - 1, generation: arena.current_gen}, nil
+		return Entity{Id: size - 1, generation: arena.current_gen}, nil
 
 	default:
 		return Entity{}, ErrInternalUnableToCreateEntity
 	}
 }
 
-func (arena *entityArena) Destroy(e Entity) error {
+func (arena *arena) Destroy(e Entity) error {
 	if !arena.Exists(e) {
 		return ErrEntityDoesNotExist
 	}
 
-	arena.cells[e.id] = EntityCell{
+	arena.cells[e.Id] = EntityCell{
 		t:    EMPTY_CELL,
 		next: arena.first_free,
 	}
 	arena.current_gen++
-	arena.first_free = e.id
+	arena.first_free = e.Id
 
 	return nil
 }
 
-func (arena *entityArena) Exists(e Entity) bool {
-	if e.id >= len(arena.cells) {
+func (arena *arena) Exists(e Entity) bool {
+	if e.Id >= len(arena.cells) {
 		return false
 	}
 
-	cell := arena.cells[e.id]
+	cell := arena.cells[e.Id]
 
 	if cell.t == END_CELL || cell.t == EMPTY_CELL {
 		return false

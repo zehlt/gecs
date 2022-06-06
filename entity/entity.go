@@ -1,6 +1,6 @@
 package entity
 
 type Entity struct {
-	id         int
+	Id         int
 	generation uint64
 }
