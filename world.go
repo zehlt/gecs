@@ -1,34 +1,38 @@
-package world
+package gecs
 
 import (
+	"github.com/zehlt/gecs/component"
 	"github.com/zehlt/gecs/entity"
+	"github.com/zehlt/gecs/registry"
 )
 
 type World interface {
 	CreateEntity() (entity.Entity, error)
-	DestroyEntity(entity.Entity) error
-	EntityExists(entity.Entity) bool
-	AddComponent(entity.Entity, interface{}) error
-	RemoveComponent(entity.Entity, interface{}) error
-	GetComponent(entity.Entity, interface{}) (interface{}, error)
-	HasComponent(entity.Entity, interface{}) bool
+	// DestroyEntity(entity.Entity) error
+	// EntityExists(entity.Entity) bool
+	// AddComponent(entity.Entity, interface{}) error
+	// RemoveComponent(entity.Entity, interface{}) error
+	// GetComponent(entity.Entity, interface{}) (interface{}, error)
+	// HasComponent(entity.Entity, interface{}) bool
 }
 
-// type SparseRegistry struct {
-// 	arena entity.Arena
-// 	store component.Store
-// }
+type world struct {
+	arena    entity.Arena
+	store    component.Store
+	registry registry.Registry
+}
 
-// func NewSparceRegistry() SparseRegistry {
-// 	return SparseRegistry{
-// 		arena: entity.NewArena(),
-// 		store: component.NewSparseStore(),
-// 	}
-// }
+func DefaultWorld() World {
+	return &world{
+		arena:    entity.NewArena(),
+		store:    component.NewStore(),
+		registry: registry.NewRegistry(),
+	}
+}
 
-// func (r *SparseRegistry) CreateEntity() (entity.Entity, error) {
-// 	return r.arena.Create()
-// }
+func (w *world) CreateEntity() (entity.Entity, error) {
+	return w.arena.Create()
+}
 
 // func (r *SparseRegistry) DestroyEntity(e entity.Entity) error {
 // 	return r.arena.Destroy(e)
