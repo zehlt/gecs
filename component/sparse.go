@@ -55,6 +55,10 @@ func (s *sparseStore) Remove(e entity.Entity, c interface{}) error {
 	return nil
 }
 
+func (s *sparseStore) RemoveAll(e entity.Entity) error {
+	panic("not done yet")
+}
+
 func (s *sparseStore) Get(e entity.Entity, c interface{}) (interface{}, error) {
 	if !s.Has(e, c) {
 		return nil, ErrEntityDoesNotHaveComponent

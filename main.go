@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/zehlt/gecs/component"
-	"github.com/zehlt/gecs/entity"
+	"github.com/zehlt/gecs/registry"
 )
 
 type Position struct {
@@ -20,21 +19,16 @@ type Movement struct {
 func main() {
 	fmt.Println("--- GECS: Sandbox ---")
 
-	arena := entity.NewArena()
-	arena.Create()
-	arena.Create()
-	e3, _ := arena.Create()
+	registry := registry.NewSparceRegistry()
 
-	store := component.NewSparseStore()
-	store.Add(e3, Position{x: 10, y: 115})
-	store.Add(e3, Movement{vel: 9, acc: 499})
-
-	pos, err := store.Get(e3, Position{})
+	e1, err := registry.CreateEntity()
 	if err != nil {
 		panic(err)
 	}
 
-	re := pos.(Position)
-	fmt.Println(re)
+	registry.AddComponent(e1, Position{x: 10, y: 125})
 
+	fmt.Println(registry.EntityExists(e1))
+	fmt.Println(registry.HasComponent(e1, Position{}))
+	fmt.Println(registry.GetComponent(e1, Position{}))
 }

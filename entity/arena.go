@@ -9,7 +9,7 @@ var (
 	ErrInternalUnableToCreateEntity = errors.New("internal error: unable to create an entity")
 )
 
-type ArenaAllocator interface {
+type Arena interface {
 	Create() (Entity, error)
 	Destroy(Entity) error
 	Exists(Entity) bool
@@ -21,7 +21,7 @@ type arena struct {
 	first_free  int
 }
 
-func NewArena() ArenaAllocator {
+func NewArena() Arena {
 	c := make([]EntityCell, 1)
 
 	c[0] = EntityCell{

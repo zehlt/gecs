@@ -7,6 +7,7 @@ import (
 type Store interface {
 	Add(entity.Entity, interface{}) error
 	Remove(entity.Entity, interface{}) error
+	RemoveAll(entity.Entity) error
 	Get(entity.Entity, interface{}) (interface{}, error)
 	Has(entity.Entity, interface{}) bool
 }
