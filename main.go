@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/zehlt/gecs/query"
 	"github.com/zehlt/gecs/registry"
+	"github.com/zehlt/gecs/scheduler"
 )
 
 type Position struct {
@@ -16,19 +18,28 @@ type Movement struct {
 	acc int
 }
 
+func Move() {
+	fmt.Println("Move")
+}
+
+func Speak() {
+	fmt.Println("Speak")
+}
+
+func Eat() {
+	fmt.Println("Eat")
+}
+
 func main() {
 	fmt.Println("--- GECS: Sandbox ---")
 
 	registry := registry.NewSparceRegistry()
+	q := query.Make(&registry, query.Access{Position{}, Movement{}}, query.Exclude{})
+	fmt.Println(q)
 
-	e1, err := registry.CreateEntity()
-	if err != nil {
-		panic(err)
-	}
-
-	registry.AddComponent(e1, Position{x: 10, y: 125})
-
-	fmt.Println(registry.EntityExists(e1))
-	fmt.Println(registry.HasComponent(e1, Position{}))
-	fmt.Println(registry.GetComponent(e1, Position{}))
+	s := scheduler.Scheduler{}
+	s.AddSystem(scheduler.System{Exec: Move})
+	s.AddSystem(scheduler.System{Exec: Speak})
+	s.AddSystem(scheduler.System{Exec: Eat})
+	s.Run()
 }
