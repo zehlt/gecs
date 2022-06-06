@@ -28,4 +28,13 @@ func main() {
 	store := component.NewSparseStore()
 	store.Add(e3, Position{x: 10, y: 115})
 	store.Add(e3, Movement{vel: 9, acc: 499})
+
+	pos, err := store.Get(e3, Position{})
+	if err != nil {
+		panic(err)
+	}
+
+	re := pos.(Position)
+	fmt.Println(re)
+
 }

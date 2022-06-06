@@ -1,9 +1,15 @@
 package component
 
 import (
+	"errors"
 	"reflect"
 
 	"github.com/zehlt/gecs/entity"
+)
+
+var (
+	ErrComponentAlreadyOwnByEntity = errors.New("component is already own by the entity")
+	ErrEntityDoesNotHaveComponent  = errors.New("entity does not have component")
 )
 
 type sparseStore struct {
@@ -19,44 +25,59 @@ func NewSparseStore() Store {
 func (s *sparseStore) Add(e entity.Entity, c interface{}) error {
 	t := reflect.TypeOf(c)
 
-	comps, ok := s.store[t]
+	_, ok := s.store[t]
 	if !ok {
 		s.store[t] = make([]interface{}, 0)
-		comps = s.store[t]
 	}
 
-	if e.Id >= len(comps) {
-		for i := e.Id - len(comps); i >= 0; i-- {
-			comps = append(comps, nil)
+	if e.Id >= len(s.store[t]) {
+		for i := e.Id - len(s.store[t]); i >= 0; i-- {
+			s.store[t] = append(s.store[t], nil)
 		}
 	}
 
-	comps[e.Id] = c
+	if s.store[t][e.Id] != nil {
+		return ErrComponentAlreadyOwnByEntity
+	}
+
+	s.store[t][e.Id] = c
 
 	return nil
 }
 
 func (s *sparseStore) Remove(e entity.Entity, c interface{}) error {
+	if !s.Has(e, c) {
+		return ErrEntityDoesNotHaveComponent
+	}
+
+	t := reflect.TypeOf(c)
+	s.store[t][e.Id] = nil
 	return nil
 }
 
 func (s *sparseStore) Get(e entity.Entity, c interface{}) (interface{}, error) {
-	return nil, nil
+	if !s.Has(e, c) {
+		return nil, ErrEntityDoesNotHaveComponent
+	}
+
+	t := reflect.TypeOf(c)
+
+	return s.store[t][e.Id], nil
 }
 
 func (s *sparseStore) Has(e entity.Entity, c interface{}) bool {
 	t := reflect.TypeOf(c)
 
-	comps, ok := s.store[t]
+	_, ok := s.store[t]
 	if !ok {
 		return false
 	}
 
-	if e.Id > len(comps)-1 {
+	if e.Id > len(s.store[t])-1 {
 		return false
 	}
 
-	if comps[e.Id] == nil {
+	if s.store[t][e.Id] == nil {
 		return false
 	}
 
