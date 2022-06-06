@@ -28,7 +28,9 @@ type defaultStore struct {
 }
 
 func NewStore() Store {
-	return &defaultStore{}
+	return &defaultStore{
+		containers: make(map[ComponentId]Container),
+	}
 }
 
 func (s *defaultStore) Register(id ComponentId, t ContainerType) error {
