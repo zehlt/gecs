@@ -44,7 +44,7 @@ func (arena *arena) Create() (Entity, error) {
 			t:          OCCUPIED_CELL,
 			generation: arena.current_gen,
 		}
-		newEntity := Entity{Id: arena.first_free, generation: arena.current_gen}
+		newEntity := Entity{id: arena.first_free, generation: arena.current_gen}
 		arena.first_free = e.next
 
 		return newEntity, nil
@@ -61,7 +61,7 @@ func (arena *arena) Create() (Entity, error) {
 		arena.cells = append(arena.cells, EntityCell{t: END_CELL})
 		arena.first_free = size
 
-		return Entity{Id: size - 1, generation: arena.current_gen}, nil
+		return Entity{id: size - 1, generation: arena.current_gen}, nil
 
 	default:
 		return Entity{}, ErrInternalUnableToCreateEntity
@@ -73,22 +73,22 @@ func (arena *arena) Destroy(e Entity) error {
 		return ErrEntityDoesNotExist
 	}
 
-	arena.cells[e.Id] = EntityCell{
+	arena.cells[e.id] = EntityCell{
 		t:    EMPTY_CELL,
 		next: arena.first_free,
 	}
 	arena.current_gen++
-	arena.first_free = e.Id
+	arena.first_free = e.id
 
 	return nil
 }
 
 func (arena *arena) Exists(e Entity) bool {
-	if e.Id >= len(arena.cells) {
+	if e.id >= len(arena.cells) {
 		return false
 	}
 
-	cell := arena.cells[e.Id]
+	cell := arena.cells[e.id]
 
 	if cell.t == END_CELL || cell.t == EMPTY_CELL {
 		return false

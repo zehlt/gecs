@@ -1,89 +1,72 @@
+// deprecated
 package component
 
-import (
-	"errors"
-	"reflect"
+// type sparseStore struct {
+// 	store map[reflect.Type][]interface{}
+// }
 
-	"github.com/zehlt/gecs/entity"
-)
+// func (s *sparseStore) Add(e entity.Entity, c interface{}) error {
+// 	t := reflect.TypeOf(c)
 
-var (
-	ErrComponentAlreadyOwnByEntity = errors.New("component is already own by the entity")
-	ErrEntityDoesNotHaveComponent  = errors.New("entity does not have component")
-)
+// 	_, ok := s.store[t]
+// 	if !ok {
+// 		s.store[t] = make([]interface{}, 0)
+// 	}
 
-type sparseStore struct {
-	store map[reflect.Type][]interface{}
-}
+// 	if e.Id >= len(s.store[t]) {
+// 		for i := e.Id - len(s.store[t]); i >= 0; i-- {
+// 			s.store[t] = append(s.store[t], nil)
+// 		}
+// 	}
 
-func NewSparseStore() Store {
-	return &sparseStore{
-		store: make(map[reflect.Type][]interface{}),
-	}
-}
+// 	if s.store[t][e.Id] != nil {
+// 		return ErrComponentAlreadyOwnByEntity
+// 	}
 
-func (s *sparseStore) Add(e entity.Entity, c interface{}) error {
-	t := reflect.TypeOf(c)
+// 	s.store[t][e.Id] = c
 
-	_, ok := s.store[t]
-	if !ok {
-		s.store[t] = make([]interface{}, 0)
-	}
+// 	return nil
+// }
 
-	if e.Id >= len(s.store[t]) {
-		for i := e.Id - len(s.store[t]); i >= 0; i-- {
-			s.store[t] = append(s.store[t], nil)
-		}
-	}
+// func (s *sparseStore) Remove(e entity.Entity, c interface{}) error {
+// 	if !s.Has(e, c) {
+// 		return ErrEntityDoesNotHaveComponent
+// 	}
 
-	if s.store[t][e.Id] != nil {
-		return ErrComponentAlreadyOwnByEntity
-	}
+// 	t := reflect.TypeOf(c)
+// 	s.store[t][e.Id] = nil
+// 	return nil
+// }
 
-	s.store[t][e.Id] = c
+// func (s *sparseStore) RemoveAll(e entity.Entity) error {
+// 	panic("not done yet")
+// }
 
-	return nil
-}
+// func (s *sparseStore) Get(e entity.Entity, c interface{}) (interface{}, error) {
+// 	if !s.Has(e, c) {
+// 		return nil, ErrEntityDoesNotHaveComponent
+// 	}
 
-func (s *sparseStore) Remove(e entity.Entity, c interface{}) error {
-	if !s.Has(e, c) {
-		return ErrEntityDoesNotHaveComponent
-	}
+// 	t := reflect.TypeOf(c)
 
-	t := reflect.TypeOf(c)
-	s.store[t][e.Id] = nil
-	return nil
-}
+// 	return s.store[t][e.Id], nil
+// }
 
-func (s *sparseStore) RemoveAll(e entity.Entity) error {
-	panic("not done yet")
-}
+// func (s *sparseStore) Has(e entity.Entity, c interface{}) bool {
+// 	t := reflect.TypeOf(c)
 
-func (s *sparseStore) Get(e entity.Entity, c interface{}) (interface{}, error) {
-	if !s.Has(e, c) {
-		return nil, ErrEntityDoesNotHaveComponent
-	}
+// 	_, ok := s.store[t]
+// 	if !ok {
+// 		return false
+// 	}
 
-	t := reflect.TypeOf(c)
+// 	if e.Id > len(s.store[t])-1 {
+// 		return false
+// 	}
 
-	return s.store[t][e.Id], nil
-}
+// 	if s.store[t][e.Id] == nil {
+// 		return false
+// 	}
 
-func (s *sparseStore) Has(e entity.Entity, c interface{}) bool {
-	t := reflect.TypeOf(c)
-
-	_, ok := s.store[t]
-	if !ok {
-		return false
-	}
-
-	if e.Id > len(s.store[t])-1 {
-		return false
-	}
-
-	if s.store[t][e.Id] == nil {
-		return false
-	}
-
-	return true
-}
+// 	return true
+// }

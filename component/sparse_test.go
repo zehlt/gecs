@@ -1,55 +1,49 @@
+// deprecated
 package component
 
-import (
-	"testing"
+// type Position struct {
+// 	x int
+// 	y int
+// }
 
-	"github.com/stretchr/testify/require"
-	"github.com/zehlt/gecs/entity"
-)
+// type Movement struct {
+// 	vel float64
+// 	acc float64
+// }
 
-type Position struct {
-	x int
-	y int
-}
+// func TestAddComponent(t *testing.T) {
+// 	store := NewSparseStore()
+// 	e1 := entity.Entity{Id: 10}
 
-type Movement struct {
-	vel float64
-	acc float64
-}
+// 	err := store.Add(e1, Position{x: 23, y: 25})
+// 	require.NoError(t, err)
 
-func TestAddComponent(t *testing.T) {
-	store := NewSparseStore()
-	e1 := entity.Entity{Id: 10}
+// 	require.True(t, store.Has(e1, Position{}))
+// 	require.False(t, store.Has(e1, Movement{}))
+// }
 
-	err := store.Add(e1, Position{x: 23, y: 25})
-	require.NoError(t, err)
+// func TestAddTwoDifferentComponent(t *testing.T) {
+// 	store := NewSparseStore()
+// 	e1 := entity.Entity{Id: 10}
 
-	require.True(t, store.Has(e1, Position{}))
-	require.False(t, store.Has(e1, Movement{}))
-}
+// 	err := store.Add(e1, Movement{vel: 23, acc: 5})
+// 	require.NoError(t, err)
 
-func TestAddTwoDifferentComponent(t *testing.T) {
-	store := NewSparseStore()
-	e1 := entity.Entity{Id: 10}
+// 	err = store.Add(e1, Position{x: 23, y: 25})
+// 	require.NoError(t, err)
 
-	err := store.Add(e1, Movement{vel: 23, acc: 5})
-	require.NoError(t, err)
+// 	require.True(t, store.Has(e1, Position{}))
+// 	require.True(t, store.Has(e1, Movement{}))
+// }
 
-	err = store.Add(e1, Position{x: 23, y: 25})
-	require.NoError(t, err)
+// func TestAddTwoSameComponent(t *testing.T) {
+// 	store := NewSparseStore()
+// 	e1 := entity.Entity{Id: 10}
 
-	require.True(t, store.Has(e1, Position{}))
-	require.True(t, store.Has(e1, Movement{}))
-}
+// 	err := store.Add(e1, Position{x: 23, y: 25})
+// 	require.NoError(t, err)
 
-func TestAddTwoSameComponent(t *testing.T) {
-	store := NewSparseStore()
-	e1 := entity.Entity{Id: 10}
-
-	err := store.Add(e1, Position{x: 23, y: 25})
-	require.NoError(t, err)
-
-	err = store.Add(e1, Position{x: 9, y: 87})
-	require.Error(t, err)
-	require.Equal(t, ErrComponentAlreadyOwnByEntity, err)
-}
+// 	err = store.Add(e1, Position{x: 9, y: 87})
+// 	require.Error(t, err)
+// 	require.Equal(t, ErrComponentAlreadyOwnByEntity, err)
+// }
