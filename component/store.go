@@ -9,11 +9,13 @@ import (
 var (
 	ErrEntityAlreadyHasComponent  = errors.New("component is already own by the entity")
 	ErrEntityDoesNotHaveComponent = errors.New("entity does not have component")
+	ErrContainerTypeDoesNotExist  = errors.New("container type does not exist")
 )
 
 type ComponentId int
 
 type Store interface {
+	Register(ComponentId, ContainerType) error
 	Add(entity.Entity, ComponentId, interface{}) error
 	Remove(entity.Entity, ComponentId) error
 	RemoveAll(entity.Entity) error
@@ -22,29 +24,57 @@ type Store interface {
 }
 
 type defaultStore struct {
-	// containers []Container
+	containers map[ComponentId]Container
 }
 
 func NewStore() Store {
 	return &defaultStore{}
 }
 
+func (s *defaultStore) Register(id ComponentId, t ContainerType) error {
+	// TODO: check registering twice
+
+	switch t {
+	case SPARSE_ARRAY_CONTAINER:
+		s.containers[id] = newSparseArray()
+		return nil
+
+	case NULL_CONTAINER:
+		s.containers[id] = newNull()
+		return nil
+
+	case HASHMAP_CONTAINER:
+		s.containers[id] = newHashmap()
+		return nil
+
+	default:
+		return ErrContainerTypeDoesNotExist
+	}
+}
+
 func (s *defaultStore) Add(e entity.Entity, id ComponentId, c interface{}) error {
-	return nil
+	return s.containers[id].Add(e, c)
 }
 
 func (s *defaultStore) Remove(e entity.Entity, id ComponentId) error {
-	return nil
+	return s.containers[id].Remove(e)
 }
 
 func (s *defaultStore) RemoveAll(e entity.Entity) error {
+	for _, container := range s.containers {
+		err := container.Remove(e)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (s *defaultStore) Get(e entity.Entity, id ComponentId) (interface{}, error) {
-	return nil, nil
+	return s.containers[id].Get(e)
 }
 
 func (s *defaultStore) Has(e entity.Entity, id ComponentId) bool {
-	return false
+	return s.containers[id].Has(e)
 }

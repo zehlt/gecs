@@ -1,4 +1,4 @@
-package signature
+package registry
 
 // footprint
 type Signature struct {

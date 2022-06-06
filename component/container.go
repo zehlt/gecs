@@ -8,3 +8,11 @@ type Container interface {
 	Get(entity.Entity) (interface{}, error)
 	Has(entity.Entity) bool
 }
+
+type ContainerType int
+
+const (
+	SPARSE_ARRAY_CONTAINER ContainerType = iota
+	NULL_CONTAINER
+	HASHMAP_CONTAINER
+)

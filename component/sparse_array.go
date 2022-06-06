@@ -4,11 +4,17 @@ import (
 	"github.com/zehlt/gecs/entity"
 )
 
-type SparseArray struct {
+type sparseArray struct {
 	components []interface{}
 }
 
-func (s *SparseArray) Add(e entity.Entity, c interface{}) error {
+func newSparseArray() Container {
+	return &sparseArray{
+		components: make([]interface{}, 0),
+	}
+}
+
+func (s *sparseArray) Add(e entity.Entity, c interface{}) error {
 	if e.Id() >= len(s.components) {
 		for i := e.Id() - len(s.components); i >= 0; i-- {
 			s.components = append(s.components, nil)
@@ -24,7 +30,7 @@ func (s *SparseArray) Add(e entity.Entity, c interface{}) error {
 	return nil
 }
 
-func (s *SparseArray) Remove(e entity.Entity) error {
+func (s *sparseArray) Remove(e entity.Entity) error {
 	if !s.Has(e) {
 		return ErrEntityDoesNotHaveComponent
 	}
@@ -34,7 +40,7 @@ func (s *SparseArray) Remove(e entity.Entity) error {
 	return nil
 }
 
-func (s *SparseArray) Get(e entity.Entity) (interface{}, error) {
+func (s *sparseArray) Get(e entity.Entity) (interface{}, error) {
 	if !s.Has(e) {
 		return nil, ErrEntityDoesNotHaveComponent
 	}
@@ -42,7 +48,7 @@ func (s *SparseArray) Get(e entity.Entity) (interface{}, error) {
 	return s.components[e.Id()], nil
 }
 
-func (s *SparseArray) Has(e entity.Entity) bool {
+func (s *sparseArray) Has(e entity.Entity) bool {
 	if e.Id() >= len(s.components) {
 		return false
 	}
