@@ -17,7 +17,22 @@ func (s *MoveSystem) Init(qm query.QueryMaker) query.Query {
 func (s *MoveSystem) Exec(cmd command.Controller, q query.Query) {
 
 	q.ForEach(func(data query.QueryData) {
+		fmt.Println("MOVINGGG !! entity:", data.E)
+	})
+}
 
-		fmt.Println("The entity that matches:", data.E)
+// ---
+
+type EnemyBarkSystem struct {
+}
+
+func (s *EnemyBarkSystem) Init(qm query.QueryMaker) query.Query {
+	return qm.Create(query.Access{Enemy{}}, query.Exclude{})
+}
+
+func (s *EnemyBarkSystem) Exec(cmd command.Controller, q query.Query) {
+
+	q.ForEach(func(data query.QueryData) {
+		fmt.Println("BARK!! entity:", data.E)
 	})
 }

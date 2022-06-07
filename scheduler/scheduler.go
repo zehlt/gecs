@@ -1,24 +1,38 @@
 package scheduler
 
-import "github.com/zehlt/gecs"
+import (
+	"github.com/zehlt/gecs"
+	"github.com/zehlt/gecs/command"
+	"github.com/zehlt/gecs/query"
+)
 
-type Scheduler struct {
-	w gecs.World
+type QSystem struct {
+	q query.Query
+	s System
 }
 
-// func (s *Scheduler) AddSystem(system System) {
-// 	// qm := system.Init()
+type Scheduler struct {
+	qm      query.QueryMaker
+	w       gecs.World
+	systems []QSystem
+}
 
-// 	// s.qsystems = append(s.qsystems, system)
-// 	system.Init()
-// }
+func NewScheduler(w gecs.World) Scheduler {
+	return Scheduler{
+		w:       w,
+		qm:      query.NewQueryMaker(w),
+		systems: make([]QSystem, 0),
+	}
+}
 
-// func (s Scheduler) Run() {
-// 	// for _, system := range s.systems {
-// 	// 	system.Exec(command.Controller{}, nil)
-// 	// }
-// }
+func (s *Scheduler) AddSystem(system System) {
+	query := system.Init(s.qm)
 
-// func (s *Scheduler) Build(w gecs.World) {
-// 	s.w = w
-// }
+	s.systems = append(s.systems, QSystem{q: query, s: system})
+}
+
+func (s Scheduler) Run() {
+	for _, system := range s.systems {
+		system.s.Exec(command.Controller{}, system.q)
+	}
+}
