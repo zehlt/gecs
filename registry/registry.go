@@ -1,11 +1,16 @@
 package registry
 
 import (
-	"fmt"
+	"errors"
 	"reflect"
 
 	"github.com/zehlt/gecs/component"
 	"github.com/zehlt/gecs/entity"
+)
+
+var (
+	ErrEntityAlreadyHasSignature  = errors.New("entity already has a signature")
+	ErrEntityDoesNotHaveSignature = errors.New("entity does not have a signature")
 )
 
 type Registry interface {
@@ -34,18 +39,20 @@ func NewRegistry() Registry {
 }
 
 func (r *defaultRegistry) CreateSignature(e entity.Entity) error {
-	// TODO: Create signature with this func instead
-	// sign, ok := r.signatures[e]
-	// if !ok {
-	// 	return fmt.Errorf("TODO: find the correct error registry")
-	// }
+	_, ok := r.signatures[e]
+	if ok {
+		return ErrEntityAlreadyHasSignature
+	}
+
+	r.signatures[e] = NewSignature()
+
 	return nil
 }
 
 func (r *defaultRegistry) DestroySignature(e entity.Entity) error {
 	_, ok := r.signatures[e]
 	if !ok {
-		return fmt.Errorf("TODO: find the correct error registry")
+		return ErrEntityDoesNotHaveSignature
 	}
 	delete(r.signatures, e)
 
@@ -55,25 +62,21 @@ func (r *defaultRegistry) DestroySignature(e entity.Entity) error {
 func (r *defaultRegistry) AddComponent(e entity.Entity, id component.ComponentId) error {
 	sign, ok := r.signatures[e]
 	if !ok {
-		sign = NewSignature()
-		r.signatures[e] = sign
+		return ErrEntityDoesNotHaveSignature
 	}
 
 	sign.AddComponent(id)
-
-	// TODO: look for reason of failure
 	return nil
 }
 
 func (r *defaultRegistry) RemoveComponent(e entity.Entity, id component.ComponentId) error {
 	sign, ok := r.signatures[e]
 	if !ok {
-		return fmt.Errorf("TODO: find the correct error registry")
+		return ErrEntityDoesNotHaveSignature
 	}
 
 	sign.RemoveComponent(id)
 
-	// TODO: look for reason of failure
 	return nil
 }
 

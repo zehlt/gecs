@@ -23,10 +23,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	e2, err := world.CreateEntity()
-	if err != nil {
-		panic(err)
-	}
+	// e2, err := world.CreateEntity()
+	// if err != nil {
+	// 	panic(err)
+	// }
 	e3, err := world.CreateEntity()
 	if err != nil {
 		panic(err)
@@ -36,21 +36,29 @@ func main() {
 	world.RegisterComponent(Speed{}, component.HASHMAP_CONTAINER)
 
 	world.AddComponent(e1, Position{x: 10, y: 25})
-
 	world.AddComponent(e3, Position{x: 10, y: 25})
 	world.AddComponent(e3, Speed{v: 999, a: 111111})
 
 	fmt.Println(world.HasComponent(e1, Speed{}))
 	fmt.Println(world.HasComponent(e1, Position{}))
 
-	fmt.Println(world.GetComponent(e1, Position{}))
-	fmt.Println(world.GetComponent(e1, Speed{}))
+	fmt.Println(world.GetComponent(e3, Position{}))
+	fmt.Println(world.GetComponent(e3, Speed{}))
 
-	fmt.Println(world.RemoveComponent(e1, Position{}))
-	fmt.Println(world.RemoveComponent(e1, Speed{}))
-	fmt.Println(world.RemoveComponent(e2, Speed{}))
+	world.DestroyEntity(e3)
 
-	fmt.Println(world.DestroyEntity(e3))
+	fmt.Println(e3)
+	fmt.Println(world.GetComponent(e3, Position{}))
+	fmt.Println(world.GetComponent(e3, Speed{}))
+
+	// e4, err := world.CreateEntity()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// fmt.Println(e4)
+	fmt.Println(world.GetComponent(e3, Position{}))
+	fmt.Println(world.GetComponent(e3, Speed{}))
 
 	// e1, err := world.CreateEntity()
 	// if err != nil {

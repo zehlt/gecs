@@ -33,7 +33,17 @@ func DefaultWorld() World {
 }
 
 func (w *world) CreateEntity() (entity.Entity, error) {
-	return w.arena.Create()
+	e, err := w.arena.Create()
+	if err != nil {
+		return entity.Entity{}, err
+	}
+
+	err = w.registry.CreateSignature(e)
+	if err != nil {
+		return entity.Entity{}, err
+	}
+
+	return e, nil
 }
 
 func (w *world) DestroyEntity(e entity.Entity) error {
