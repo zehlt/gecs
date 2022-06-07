@@ -34,6 +34,7 @@ func NewRegistry() Registry {
 }
 
 func (r *defaultRegistry) CreateSignature(e entity.Entity) error {
+	// TODO: Create signature with this func instead
 	// sign, ok := r.signatures[e]
 	// if !ok {
 	// 	return fmt.Errorf("TODO: find the correct error registry")
