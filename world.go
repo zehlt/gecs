@@ -16,6 +16,8 @@ type World interface {
 	AddComponent(entity.Entity, interface{}) error
 	RemoveComponent(entity.Entity, interface{}) error
 	GetComponent(entity.Entity, interface{}) (interface{}, error)
+	GetComponentById(entity.Entity, component.ComponentId) (interface{}, error)
+	GetComponentId(c interface{}) component.ComponentId
 	HasComponent(entity.Entity, interface{}) bool
 
 	GetSignatureFromTypes(types []interface{}) signature.Signature
@@ -111,6 +113,22 @@ func (w *world) GetComponent(e entity.Entity, c interface{}) (interface{}, error
 	}
 
 	return w.store.Get(e, id)
+}
+
+func (w *world) GetComponentById(e entity.Entity, id component.ComponentId) (interface{}, error) {
+	if !w.arena.Exists(e) {
+		return nil, entity.ErrEntityDoesNotExist
+	}
+
+	if !w.registry.HasComponent(e, id) {
+		return nil, component.ErrEntityDoesNotHaveComponent
+	}
+
+	return w.store.Get(e, id)
+}
+
+func (w *world) GetComponentId(c interface{}) component.ComponentId {
+	return w.registry.GetComponentId(c)
 }
 
 func (w *world) HasComponent(e entity.Entity, c interface{}) bool {

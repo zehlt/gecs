@@ -1,6 +1,9 @@
 package query
 
-import "github.com/zehlt/gecs"
+import (
+	"github.com/zehlt/gecs"
+	"github.com/zehlt/gecs/component"
+)
 
 type Access []interface{}
 
@@ -22,5 +25,16 @@ func (qm *queryMaker) Create(a Access, e Exclude) Query {
 	access_sign := qm.w.GetSignatureFromTypes(a)
 	exclude_sign := qm.w.GetSignatureFromTypes(e)
 
-	return &query{w: qm.w, access_sign: access_sign, exclude_sign: exclude_sign}
+	component_ids := make([]component.ComponentId, len(a))
+
+	for i, t := range a {
+		component_ids[i] = qm.w.GetComponentId(t)
+	}
+
+	return &query{
+		w:             qm.w,
+		component_ids: component_ids,
+		access_sign:   access_sign,
+		exclude_sign:  exclude_sign,
+	}
 }

@@ -2,6 +2,9 @@ package component
 
 import "github.com/zehlt/gecs/entity"
 
+type NullEmptySruct struct {
+}
+
 type Null struct {
 }
 
@@ -18,7 +21,7 @@ func (n *Null) Remove(e entity.Entity) error {
 }
 
 func (n *Null) Get(e entity.Entity) (interface{}, error) {
-	return nil, nil
+	return NullEmptySruct{}, nil
 }
 
 func (n *Null) Has(e entity.Entity) bool {

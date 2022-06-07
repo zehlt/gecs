@@ -1,4 +1,4 @@
-package scheduler
+package system
 
 import (
 	"github.com/zehlt/gecs"
