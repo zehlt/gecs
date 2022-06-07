@@ -1,8 +1,6 @@
 package gecs
 
 import (
-	"fmt"
-
 	"github.com/zehlt/gecs/component"
 	"github.com/zehlt/gecs/entity"
 
@@ -20,8 +18,8 @@ type World interface {
 	GetComponent(entity.Entity, interface{}) (interface{}, error)
 	HasComponent(entity.Entity, interface{}) bool
 
-	CreateQuery(a Access, e Exclude) (Query, error)
-	MakeQuery(Query)
+	GetSignatureFromTypes(types []interface{}) signature.Signature
+	FindMatchingEntities(signature.Signature) []entity.Entity
 }
 
 type world struct {
@@ -124,14 +122,10 @@ func (w *world) HasComponent(e entity.Entity, c interface{}) bool {
 	return w.registry.HasComponent(e, id)
 }
 
-func (w *world) CreateQuery(a Access, e Exclude) (Query, error) {
-	access_sign := w.registry.GetSignatureFromTypes(a)
-	exclude_sign := w.registry.GetSignatureFromTypes(e)
-
-	return Query{w: w, access_sign: access_sign, exclude_sign: exclude_sign}, nil
+func (w *world) GetSignatureFromTypes(types []interface{}) signature.Signature {
+	return w.registry.GetSignatureFromTypes(types)
 }
 
-func (w *world) MakeQuery(q Query) {
-	res := w.registry.FindMatchingEntities(q.access_sign)
-	fmt.Println(res)
+func (w *world) FindMatchingEntities(s signature.Signature) []entity.Entity {
+	return w.registry.FindMatchingEntities(s)
 }

@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/zehlt/gecs"
 	"github.com/zehlt/gecs/component"
+	"github.com/zehlt/gecs/query"
 )
 
 type Position struct {
@@ -48,9 +51,12 @@ func main() {
 	world.AddComponent(e2, Life{hp: 200})
 	world.AddComponent(e2, Speed{v: 200, a: 2000})
 
-	q, err := world.CreateQuery(gecs.Access{Position{}, Life{}}, gecs.Exclude{Speed{}, Position{}})
-	if err != nil {
-		panic(err)
-	}
-	world.MakeQuery(q)
+	// world.RemoveComponent(e2, Speed{})
+
+	qm := query.NewQueryMaker(world)
+	q := qm.Create(query.Access{Position{}, Speed{}}, query.Exclude{})
+
+	q.ForEach(func(data query.QueryData) {
+		fmt.Println("The entity that matches:", data.E)
+	})
 }

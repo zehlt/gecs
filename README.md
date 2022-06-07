@@ -6,4 +6,6 @@ resource
 scheduler
 events
 concurrency
-archetype
+
+use basic go function that can be prossed with reflection to determined types
+adding cached query ?

@@ -1,15 +1,24 @@
 package scheduler
 
+import "github.com/zehlt/gecs"
+
 type Scheduler struct {
-	systems []System
+	w gecs.World
 }
 
-func (s *Scheduler) AddSystem(system System) {
-	s.systems = append(s.systems, system)
-}
+// func (s *Scheduler) AddSystem(system System) {
+// 	// qm := system.Init()
 
-func (s Scheduler) Run() {
-	for _, system := range s.systems {
-		system.Exec()
-	}
-}
+// 	// s.qsystems = append(s.qsystems, system)
+// 	system.Init()
+// }
+
+// func (s Scheduler) Run() {
+// 	// for _, system := range s.systems {
+// 	// 	system.Exec(command.Controller{}, nil)
+// 	// }
+// }
+
+// func (s *Scheduler) Build(w gecs.World) {
+// 	s.w = w
+// }
