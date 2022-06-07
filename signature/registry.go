@@ -1,4 +1,4 @@
-package registry
+package signature
 
 import (
 	"errors"
@@ -14,13 +14,16 @@ var (
 )
 
 type Registry interface {
-	CreateSignature(entity.Entity) error
-	DestroySignature(entity.Entity) error
+	CreateEntitySignature(entity.Entity) error
+	DestroyEntitySignature(entity.Entity) error
 
 	AddComponent(entity.Entity, component.ComponentId) error
 	RemoveComponent(entity.Entity, component.ComponentId) error
 	HasComponent(entity.Entity, component.ComponentId) bool
 	GetComponentId(c interface{}) component.ComponentId
+
+	GetSignatureFromTypes([]interface{}) Signature
+	FindMatchingEntities(Signature) []entity.Entity
 }
 
 type defaultRegistry struct {
@@ -38,7 +41,7 @@ func NewRegistry() Registry {
 	}
 }
 
-func (r *defaultRegistry) CreateSignature(e entity.Entity) error {
+func (r *defaultRegistry) CreateEntitySignature(e entity.Entity) error {
 	_, ok := r.signatures[e]
 	if ok {
 		return ErrEntityAlreadyHasSignature
@@ -49,7 +52,7 @@ func (r *defaultRegistry) CreateSignature(e entity.Entity) error {
 	return nil
 }
 
-func (r *defaultRegistry) DestroySignature(e entity.Entity) error {
+func (r *defaultRegistry) DestroyEntitySignature(e entity.Entity) error {
 	_, ok := r.signatures[e]
 	if !ok {
 		return ErrEntityDoesNotHaveSignature
@@ -100,4 +103,27 @@ func (r *defaultRegistry) GetComponentId(c interface{}) component.ComponentId {
 	}
 
 	return id
+}
+
+func (r *defaultRegistry) GetSignatureFromTypes(types []interface{}) Signature {
+	sign := NewSignature()
+
+	for _, t := range types {
+		id := r.GetComponentId(t)
+		sign.AddComponent(id)
+	}
+
+	return sign
+}
+
+func (r *defaultRegistry) FindMatchingEntities(matcher Signature) []entity.Entity {
+	entities := make([]entity.Entity, 0)
+
+	for e, s := range r.signatures {
+		if s.Contains(matcher) {
+			entities = append(entities, e)
+		}
+	}
+
+	return entities
 }

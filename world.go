@@ -1,9 +1,12 @@
 package gecs
 
 import (
+	"fmt"
+
 	"github.com/zehlt/gecs/component"
 	"github.com/zehlt/gecs/entity"
-	"github.com/zehlt/gecs/registry"
+
+	"github.com/zehlt/gecs/signature"
 )
 
 type World interface {
@@ -16,19 +19,22 @@ type World interface {
 	RemoveComponent(entity.Entity, interface{}) error
 	GetComponent(entity.Entity, interface{}) (interface{}, error)
 	HasComponent(entity.Entity, interface{}) bool
+
+	CreateQuery(a Access, e Exclude) (Query, error)
+	MakeQuery(Query)
 }
 
 type world struct {
 	arena    entity.Arena
 	store    component.Store
-	registry registry.Registry
+	registry signature.Registry
 }
 
 func DefaultWorld() World {
 	return &world{
 		arena:    entity.NewArena(),
 		store:    component.NewStore(),
-		registry: registry.NewRegistry(),
+		registry: signature.NewRegistry(),
 	}
 }
 
@@ -38,7 +44,7 @@ func (w *world) CreateEntity() (entity.Entity, error) {
 		return entity.Entity{}, err
 	}
 
-	err = w.registry.CreateSignature(e)
+	err = w.registry.CreateEntitySignature(e)
 	if err != nil {
 		return entity.Entity{}, err
 	}
@@ -53,7 +59,7 @@ func (w *world) DestroyEntity(e entity.Entity) error {
 		return err
 	}
 
-	w.registry.DestroySignature(e)
+	w.registry.DestroyEntitySignature(e)
 
 	return w.store.RemoveAll(e)
 }
@@ -116,4 +122,16 @@ func (w *world) HasComponent(e entity.Entity, c interface{}) bool {
 
 	id := w.registry.GetComponentId(c)
 	return w.registry.HasComponent(e, id)
+}
+
+func (w *world) CreateQuery(a Access, e Exclude) (Query, error) {
+	access_sign := w.registry.GetSignatureFromTypes(a)
+	exclude_sign := w.registry.GetSignatureFromTypes(e)
+
+	return Query{w: w, access_sign: access_sign, exclude_sign: exclude_sign}, nil
+}
+
+func (w *world) MakeQuery(q Query) {
+	res := w.registry.FindMatchingEntities(q.access_sign)
+	fmt.Println(res)
 }

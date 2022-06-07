@@ -1,4 +1,4 @@
-package registry
+package signature
 
 import (
 	"fmt"
@@ -52,6 +52,27 @@ func (b *Bitset) Include(other *Bitset) bool {
 
 	for i := 0; i < other.Len(); i++ {
 		if b.bytes[i] != other.bytes[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (b *Bitset) Contains(matcher *Bitset) bool {
+	// TODO: the other may be longer with only 00000
+	if matcher.Len() > b.Len() {
+		return false
+	}
+
+	for i := 0; i < matcher.Len(); i++ {
+		match_byte := matcher.bytes[i]
+
+		if match_byte == 0 {
+			continue
+		}
+
+		if (b.bytes[i] & match_byte) != match_byte {
 			return false
 		}
 	}
