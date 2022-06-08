@@ -12,6 +12,7 @@ type QSystem struct {
 }
 
 type Scheduler struct {
+	ctl     command.Controller
 	qm      query.QueryMaker
 	w       gecs.World
 	systems []QSystem
@@ -22,6 +23,7 @@ func NewScheduler(w gecs.World) Scheduler {
 		w:       w,
 		qm:      query.NewQueryMaker(w),
 		systems: make([]QSystem, 0),
+		ctl:     command.NewController(w),
 	}
 }
 
@@ -33,6 +35,7 @@ func (s *Scheduler) AddSystem(system System) {
 
 func (s Scheduler) Run() {
 	for _, system := range s.systems {
-		system.s.Exec(command.Controller{}, system.q)
+		system.s.Exec(s.ctl, system.q)
+		s.ctl.Execute()
 	}
 }

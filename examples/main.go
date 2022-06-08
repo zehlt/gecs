@@ -23,13 +23,17 @@ type Life struct {
 type Enemy struct {
 }
 
+type Player struct {
+}
+
 func main() {
 	// Testing
 	world := gecs.DefaultWorld()
-	world.RegisterComponent(Position{}, component.SPARSE_ARRAY_CONTAINER)
-	world.RegisterComponent(Speed{}, component.HASHMAP_CONTAINER)
-	world.RegisterComponent(Life{}, component.HASHMAP_CONTAINER)
-	world.RegisterComponent(Enemy{}, component.NULL_CONTAINER)
+	world.RegisterComponent(&Position{}, component.SPARSE_ARRAY_CONTAINER)
+	world.RegisterComponent(&Speed{}, component.HASHMAP_CONTAINER)
+	world.RegisterComponent(&Life{}, component.HASHMAP_CONTAINER)
+	world.RegisterComponent(&Enemy{}, component.NULL_CONTAINER)
+	world.RegisterComponent(&Player{}, component.NULL_CONTAINER)
 
 	e1, err := world.CreateEntity()
 	if err != nil {
@@ -41,21 +45,23 @@ func main() {
 		panic(err)
 	}
 
-	world.AddComponent(e1, Position{x: 10, y: 10})
-	world.AddComponent(e1, Speed{v: 100, a: 1000})
-	world.AddComponent(e1, Life{hp: 100})
+	world.AddComponent(e1, &Position{x: 10, y: 10})
+	world.AddComponent(e1, &Speed{v: 100, a: 1000})
+	world.AddComponent(e1, &Life{hp: 100})
+	world.AddComponent(e1, &Player{})
 
-	world.AddComponent(e2, Enemy{})
-	world.AddComponent(e2, Position{x: 20, y: 20})
-	world.AddComponent(e2, Life{hp: 200})
-	world.AddComponent(e2, Speed{v: 200, a: 2000})
+	world.AddComponent(e2, &Enemy{})
+	world.AddComponent(e2, &Position{x: 20, y: 20})
+	world.AddComponent(e2, &Life{hp: 200})
+	world.AddComponent(e2, &Speed{v: 200, a: 2000})
 
 	// SCHEDULER EXAMPLE
 	sc := system.NewScheduler(world)
 	sc.AddSystem(&MoveSystem{})
 	sc.AddSystem(&EnemyBarkSystem{})
+	sc.AddSystem(&KillPlayerSystem{})
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 20; i++ {
 		sc.Run()
 	}
 }
