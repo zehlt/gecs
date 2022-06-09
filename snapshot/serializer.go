@@ -2,6 +2,7 @@ package snapshot
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/zehlt/gecs"
 	"github.com/zehlt/gecs/component"
@@ -73,9 +74,13 @@ func (s *serializer) Deserialize(data []byte) (gecs.World, error) {
 
 		components := snap.Comps[i]
 		for j := 0; j < len(components); j++ {
+			p := reflect.New(reflect.TypeOf(components[j]))
+			p.Elem().Set(reflect.ValueOf(components[j]))
+			comp := p.Interface()
+
 			// TODO: made the container not specific
-			w.RegisterComponent(components[j], component.SPARSE_ARRAY_CONTAINER)
-			w.AddComponent(e, components[j])
+			w.RegisterComponent(comp, component.SPARSE_ARRAY_CONTAINER)
+			w.AddComponent(e, comp)
 		}
 	}
 

@@ -30,8 +30,13 @@ type Enemy struct {
 type Player struct {
 }
 
+func MyPrintln(x interface{}) {
+	fmt.Printf("t: %T, v: %v\n", x, x)
+}
+
 func main() {
-	// Testing
+
+	// // Testing
 	world := gecs.DefaultWorld()
 	world.RegisterComponent(&Position{}, component.SPARSE_ARRAY_CONTAINER)
 	world.RegisterComponent(&Speed{}, component.HASHMAP_CONTAINER)
@@ -74,10 +79,10 @@ func main() {
 	world.AddComponent(e3, &Speed{V: 300, A: 3000})
 
 	// SCHEDULER EXAMPLE
-	sc := system.NewScheduler(world)
-	sc.AddSystem(&MoveSystem{})
-	sc.AddSystem(&EnemyBarkSystem{})
-	sc.AddSystem(&KillPlayerSystem{})
+	// sc := system.NewScheduler(world)
+	// sc.AddSystem(&MoveSystem{})
+	// sc.AddSystem(&EnemyBarkSystem{})
+	// sc.AddSystem(&KillPlayerSystem{})
 
 	fmt.Println("--- SERIALIZE ---")
 	serial := snapshot.NewSerializer()
@@ -97,5 +102,14 @@ func main() {
 	for _, e := range ents {
 		cs, _ := w2.GetAllComponentsFromEntity(e)
 		fmt.Println("c", cs)
+	}
+
+	sc2 := system.NewScheduler(w2)
+	sc2.AddSystem(&MoveSystem{})
+	sc2.AddSystem(&EnemyBarkSystem{})
+	sc2.AddSystem(&KillPlayerSystem{})
+
+	for i := 0; i < 1000; i++ {
+		sc2.Run()
 	}
 }

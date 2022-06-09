@@ -17,10 +17,10 @@ func (s *MoveSystem) Init(qm query.QueryMaker) query.Query {
 
 func (s *MoveSystem) Exec(cmd command.Controller, q query.Query) {
 	q.Entities(func(e entity.Entity) {
-		pos, _ := q.GetComponent(e, 0).(*Position)
-		spd, _ := q.GetComponent(e, 1).(*Speed)
+		// pos, _ := q.GetComponent(e, 0).(*Position)
+		// spd, _ := q.GetComponent(e, 1).(*Speed)
 
-		pos.X += int(spd.V)
+		// pos.X += int(spd.V)
 	})
 }
 
