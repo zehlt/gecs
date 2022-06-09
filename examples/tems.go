@@ -20,7 +20,7 @@ func (s *MoveSystem) Exec(cmd command.Controller, q query.Query) {
 		pos, _ := q.GetComponent(e, 0).(*Position)
 		spd, _ := q.GetComponent(e, 1).(*Speed)
 
-		pos.x += int(spd.v)
+		pos.X += int(spd.V)
 	})
 }
 
@@ -37,7 +37,7 @@ func (s *EnemyBarkSystem) Exec(cmd command.Controller, q query.Query) {
 
 	q.Entities(func(e entity.Entity) {
 		life := q.GetComponent(e, 0).(*Life)
-		life.hp -= 10
+		life.HP -= 10
 		fmt.Println("Life Left:", life)
 	})
 }
@@ -56,7 +56,7 @@ func (s *KillPlayerSystem) Exec(cmd command.Controller, q query.Query) {
 	q.Entities(func(e entity.Entity) {
 		player_life := q.GetComponent(e, 0).(*Life)
 
-		if player_life.hp < 0 {
+		if player_life.HP < 0 {
 			cmd.DestroyEntity(e)
 		}
 

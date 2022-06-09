@@ -11,17 +11,20 @@ type World interface {
 	CreateEntity() (entity.Entity, error)
 	DestroyEntity(entity.Entity) error
 	EntityExists(entity.Entity) bool
+	GetAllEntities() []entity.Entity
 
 	RegisterComponent(interface{}, component.ContainerType) error
 	AddComponent(entity.Entity, interface{}) error
 	RemoveComponent(entity.Entity, interface{}) error
 	GetComponent(entity.Entity, interface{}) (interface{}, error)
 	GetComponentById(entity.Entity, component.ComponentId) (interface{}, error)
+	GetAllComponentsFromEntity(entity.Entity) ([]interface{}, error)
 	GetComponentId(c interface{}) component.ComponentId
 	HasComponent(entity.Entity, interface{}) bool
 
 	GetSignatureFromTypes(types []interface{}) signature.Signature
 	FindMatchingEntities(signature.Signature) []entity.Entity
+	GetEntitySignature(e entity.Entity) (signature.Signature, error)
 }
 
 type world struct {
@@ -50,6 +53,10 @@ func (w *world) CreateEntity() (entity.Entity, error) {
 	}
 
 	return e, nil
+}
+
+func (w *world) GetAllEntities() []entity.Entity {
+	return w.arena.GetAll()
 }
 
 func (w *world) DestroyEntity(e entity.Entity) error {
@@ -115,6 +122,14 @@ func (w *world) GetComponent(e entity.Entity, c interface{}) (interface{}, error
 	return w.store.Get(e, id)
 }
 
+func (w *world) GetAllComponentsFromEntity(e entity.Entity) ([]interface{}, error) {
+	if !w.arena.Exists(e) {
+		return nil, entity.ErrEntityDoesNotExist
+	}
+
+	return w.store.GetAll(e), nil
+}
+
 func (w *world) GetComponentById(e entity.Entity, id component.ComponentId) (interface{}, error) {
 	if !w.arena.Exists(e) {
 		return nil, entity.ErrEntityDoesNotExist
@@ -146,4 +161,8 @@ func (w *world) GetSignatureFromTypes(types []interface{}) signature.Signature {
 
 func (w *world) FindMatchingEntities(s signature.Signature) []entity.Entity {
 	return w.registry.FindMatchingEntities(s)
+}
+
+func (w *world) GetEntitySignature(e entity.Entity) (signature.Signature, error) {
+	return w.registry.GetEntitySignature(e)
 }

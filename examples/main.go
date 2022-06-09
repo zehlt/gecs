@@ -1,23 +1,27 @@
 package main
 
 import (
+	"encoding/gob"
+	"fmt"
+
 	"github.com/zehlt/gecs"
 	"github.com/zehlt/gecs/component"
+	"github.com/zehlt/gecs/snapshot"
 	"github.com/zehlt/gecs/system"
 )
 
 type Position struct {
-	x int
-	y int
+	X int
+	Y int
 }
 
 type Speed struct {
-	v float64
-	a float64
+	V float64
+	A float64
 }
 
 type Life struct {
-	hp int
+	HP int
 }
 
 type Enemy struct {
@@ -35,6 +39,10 @@ func main() {
 	world.RegisterComponent(&Enemy{}, component.NULL_CONTAINER)
 	world.RegisterComponent(&Player{}, component.NULL_CONTAINER)
 
+	gob.Register(Position{})
+	gob.Register(Speed{})
+	gob.Register(Life{})
+
 	e1, err := world.CreateEntity()
 	if err != nil {
 		panic(err)
@@ -45,15 +53,25 @@ func main() {
 		panic(err)
 	}
 
-	world.AddComponent(e1, &Position{x: 10, y: 10})
-	world.AddComponent(e1, &Speed{v: 100, a: 1000})
-	world.AddComponent(e1, &Life{hp: 100})
+	e3, err := world.CreateEntity()
+	if err != nil {
+		panic(err)
+	}
+
+	world.AddComponent(e1, &Position{X: 10, Y: 10})
+	world.AddComponent(e1, &Speed{V: 100, A: 1000})
+	world.AddComponent(e1, &Life{HP: 100})
 	world.AddComponent(e1, &Player{})
 
 	world.AddComponent(e2, &Enemy{})
-	world.AddComponent(e2, &Position{x: 20, y: 20})
-	world.AddComponent(e2, &Life{hp: 200})
-	world.AddComponent(e2, &Speed{v: 200, a: 2000})
+	world.AddComponent(e2, &Position{X: 20, Y: 20})
+	world.AddComponent(e2, &Life{HP: 200})
+	world.AddComponent(e2, &Speed{V: 200, A: 2000})
+
+	world.AddComponent(e3, &Enemy{})
+	world.AddComponent(e3, &Position{X: 30, Y: 30})
+	world.AddComponent(e3, &Life{HP: 300})
+	world.AddComponent(e3, &Speed{V: 300, A: 3000})
 
 	// SCHEDULER EXAMPLE
 	sc := system.NewScheduler(world)
@@ -61,7 +79,23 @@ func main() {
 	sc.AddSystem(&EnemyBarkSystem{})
 	sc.AddSystem(&KillPlayerSystem{})
 
-	for i := 0; i < 20; i++ {
-		sc.Run()
+	fmt.Println("--- SERIALIZE ---")
+	serial := snapshot.NewSerializer()
+	bytes, err := serial.Serialize(world)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(bytes)
+
+	fmt.Println("--- DESERIALIZE ---")
+	w2, err := serial.Deserialize(bytes)
+	if err != nil {
+		panic(err)
+	}
+
+	ents := w2.GetAllEntities()
+	for _, e := range ents {
+		cs, _ := w2.GetAllComponentsFromEntity(e)
+		fmt.Println("c", cs)
 	}
 }

@@ -15,6 +15,7 @@ var (
 
 type Registry interface {
 	CreateEntitySignature(entity.Entity) error
+	GetEntitySignature(entity.Entity) (Signature, error)
 	DestroyEntitySignature(entity.Entity) error
 
 	AddComponent(entity.Entity, component.ComponentId) error
@@ -50,6 +51,15 @@ func (r *defaultRegistry) CreateEntitySignature(e entity.Entity) error {
 	r.signatures[e] = NewSignature()
 
 	return nil
+}
+
+func (r *defaultRegistry) GetEntitySignature(e entity.Entity) (Signature, error) {
+	sign, ok := r.signatures[e]
+	if !ok {
+		return nil, ErrEntityDoesNotHaveSignature
+	}
+
+	return sign, nil
 }
 
 func (r *defaultRegistry) DestroyEntitySignature(e entity.Entity) error {

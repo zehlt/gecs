@@ -20,6 +20,7 @@ type Store interface {
 	Remove(entity.Entity, ComponentId) error
 	RemoveAll(entity.Entity) error
 	Get(entity.Entity, ComponentId) (interface{}, error)
+	GetAll(entity.Entity) []interface{}
 	Has(entity.Entity, ComponentId) bool
 }
 
@@ -34,7 +35,10 @@ func NewStore() Store {
 }
 
 func (s *defaultStore) Register(id ComponentId, t ContainerType) error {
-	// TODO: check registering twice
+	_, ok := s.containers[id]
+	if ok {
+		return nil
+	}
 
 	switch t {
 	case SPARSE_ARRAY_CONTAINER:
@@ -75,6 +79,19 @@ func (s *defaultStore) RemoveAll(e entity.Entity) error {
 
 func (s *defaultStore) Get(e entity.Entity, id ComponentId) (interface{}, error) {
 	return s.containers[id].Get(e)
+}
+
+func (s *defaultStore) GetAll(e entity.Entity) []interface{} {
+	components := make([]interface{}, 0)
+
+	for _, container := range s.containers {
+		if container.Has(e) {
+			component, _ := container.Get(e)
+			components = append(components, component)
+		}
+	}
+
+	return components
 }
 
 func (s *defaultStore) Has(e entity.Entity, id ComponentId) bool {

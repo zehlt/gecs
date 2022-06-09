@@ -13,6 +13,7 @@ type Arena interface {
 	Create() (Entity, error)
 	Destroy(Entity) error
 	Exists(Entity) bool
+	GetAll() []Entity
 }
 
 type arena struct {
@@ -99,4 +100,19 @@ func (arena *arena) Exists(e Entity) bool {
 	}
 
 	return true
+}
+
+func (arena *arena) GetAll() []Entity {
+
+	entities := make([]Entity, 0)
+
+	for i := 0; i < len(arena.cells); i++ {
+		cell := arena.cells[i]
+
+		if cell.t == OCCUPIED_CELL {
+			entities = append(entities, Entity{id: i, generation: cell.generation})
+		}
+	}
+
+	return entities
 }
