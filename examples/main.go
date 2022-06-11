@@ -33,6 +33,14 @@ func MyPrintln(x interface{}) {
 	fmt.Printf("t: %T, v: %v\n", x, x)
 }
 
+type TryInterface interface {
+	Try() bool
+}
+
+type Renderer struct {
+	x int
+}
+
 func main() {
 
 	// // Testing
@@ -42,6 +50,17 @@ func main() {
 	world.RegisterComponent(&Life{}, component.HASHMAP_CONTAINER)
 	world.RegisterComponent(&Enemy{}, component.NULL_CONTAINER)
 	world.RegisterComponent(&Player{}, component.NULL_CONTAINER)
+
+	err := world.AddResource(Renderer{x: 12})
+	if err != nil {
+		panic(err)
+	}
+
+	re, err := world.GetResource(Renderer{})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("ress", re)
 
 	e1, err := world.CreateEntity()
 	if err != nil {

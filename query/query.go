@@ -11,16 +11,19 @@ import (
 
 var (
 	ErrQueryComponentPositionTooBig = errors.New("asked component position too big")
+	ErrResourcePositionTooBig       = errors.New("asked resource position too big")
 )
 
 type Query interface {
 	Entities(fn func(e entity.Entity))
 	GetComponent(e entity.Entity, n int) interface{}
+	GetResource(n int) interface{}
 }
 
 type query struct {
 	w             gecs.World
 	component_ids []component.ComponentId
+	resources     []interface{}
 
 	access_sign  signature.Signature
 	exclude_sign signature.Signature
@@ -46,4 +49,12 @@ func (q *query) GetComponent(e entity.Entity, n int) interface{} {
 	}
 
 	return comp
+}
+
+func (q *query) GetResource(n int) interface{} {
+	if n >= len(q.resources) {
+		panic(ErrQueryComponentPositionTooBig)
+	}
+
+	return q.resources[n]
 }

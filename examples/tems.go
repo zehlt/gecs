@@ -12,7 +12,7 @@ type MoveSystem struct {
 }
 
 func (s *MoveSystem) Init(qm query.QueryMaker) query.Query {
-	return qm.Create(query.Access{&Position{}, &Speed{}}, query.Exclude{})
+	return qm.Create(query.Resource{}, query.Access{&Position{}, &Speed{}}, query.Exclude{})
 }
 
 func (s *MoveSystem) Exec(cmd command.Controller, q query.Query) {
@@ -30,7 +30,7 @@ type EnemyBarkSystem struct {
 }
 
 func (s *EnemyBarkSystem) Init(qm query.QueryMaker) query.Query {
-	return qm.Create(query.Access{&Life{}}, query.Exclude{})
+	return qm.Create(query.Resource{}, query.Access{&Life{}}, query.Exclude{})
 }
 
 func (s *EnemyBarkSystem) Exec(cmd command.Controller, q query.Query) {
@@ -48,7 +48,7 @@ type KillPlayerSystem struct {
 }
 
 func (s *KillPlayerSystem) Init(qm query.QueryMaker) query.Query {
-	return qm.Create(query.Access{&Life{}, &Player{}}, query.Exclude{})
+	return qm.Create(query.Resource{}, query.Access{&Life{}, &Player{}}, query.Exclude{})
 }
 
 func (s *KillPlayerSystem) Exec(cmd command.Controller, q query.Query) {

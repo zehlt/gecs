@@ -6,11 +6,11 @@ import (
 )
 
 type Access []interface{}
-
 type Exclude []interface{}
+type Resource []interface{}
 
 type QueryMaker interface {
-	Create(a Access, e Exclude) Query
+	Create(r Resource, a Access, e Exclude) Query
 }
 
 type queryMaker struct {
@@ -21,14 +21,23 @@ func NewQueryMaker(w gecs.World) QueryMaker {
 	return &queryMaker{w: w}
 }
 
-func (qm *queryMaker) Create(a Access, e Exclude) Query {
+func (qm *queryMaker) Create(r Resource, a Access, e Exclude) Query {
 	access_sign := qm.w.GetSignatureFromTypes(a)
 	exclude_sign := qm.w.GetSignatureFromTypes(e)
 
 	component_ids := make([]component.ComponentId, len(a))
+	resources := make([]interface{}, len(r))
 
 	for i, t := range a {
 		component_ids[i] = qm.w.GetComponentId(t)
+	}
+
+	for i, t := range r {
+		co, err := qm.w.GetResource(t)
+		if err != nil {
+			panic(err)
+		}
+		resources[i] = co
 	}
 
 	return &query{
@@ -36,5 +45,6 @@ func (qm *queryMaker) Create(a Access, e Exclude) Query {
 		component_ids: component_ids,
 		access_sign:   access_sign,
 		exclude_sign:  exclude_sign,
+		resources:     resources,
 	}
 }

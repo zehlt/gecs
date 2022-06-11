@@ -3,6 +3,7 @@ package gecs
 import (
 	"github.com/zehlt/gecs/component"
 	"github.com/zehlt/gecs/entity"
+	"github.com/zehlt/gecs/resource"
 
 	"github.com/zehlt/gecs/signature"
 )
@@ -22,12 +23,17 @@ type World interface {
 	GetComponentId(c interface{}) component.ComponentId
 	HasComponent(entity.Entity, interface{}) bool
 
+	AddResource(interface{}) error
+	GetResource(interface{}) (interface{}, error)
+	HasResource(interface{}) bool
+
 	GetSignatureFromTypes(types []interface{}) signature.Signature
 	FindMatchingEntities(signature.Signature) []entity.Entity
 	GetEntitySignature(e entity.Entity) (signature.Signature, error)
 }
 
 type world struct {
+	locker   resource.Locker
 	arena    entity.Arena
 	store    component.Store
 	registry signature.Registry
@@ -35,6 +41,7 @@ type world struct {
 
 func DefaultWorld() World {
 	return &world{
+		locker:   resource.NewLocker(),
 		arena:    entity.NewArena(),
 		store:    component.NewStore(),
 		registry: signature.NewRegistry(),
@@ -153,6 +160,18 @@ func (w *world) HasComponent(e entity.Entity, c interface{}) bool {
 
 	id := w.registry.GetComponentId(c)
 	return w.registry.HasComponent(e, id)
+}
+
+func (w *world) AddResource(c interface{}) error {
+	return w.locker.Add(c)
+}
+
+func (w *world) GetResource(t interface{}) (interface{}, error) {
+	return w.locker.Get(t)
+}
+
+func (w *world) HasResource(t interface{}) bool {
+	return w.locker.Has(t)
 }
 
 func (w *world) GetSignatureFromTypes(types []interface{}) signature.Signature {
