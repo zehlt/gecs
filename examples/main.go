@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/gob"
 	"fmt"
 
 	"github.com/zehlt/gecs"
@@ -44,10 +43,6 @@ func main() {
 	world.RegisterComponent(&Enemy{}, component.NULL_CONTAINER)
 	world.RegisterComponent(&Player{}, component.NULL_CONTAINER)
 
-	gob.Register(Position{})
-	gob.Register(Speed{})
-	gob.Register(Life{})
-
 	e1, err := world.CreateEntity()
 	if err != nil {
 		panic(err)
@@ -86,6 +81,10 @@ func main() {
 
 	fmt.Println("--- SERIALIZE ---")
 	serial := snapshot.NewSerializer()
+	serial.Register(&Position{})
+	serial.Register(&Speed{})
+	serial.Register(&Life{})
+
 	bytes, err := serial.Serialize(world)
 	if err != nil {
 		panic(err)
@@ -109,7 +108,7 @@ func main() {
 	sc2.AddSystem(&EnemyBarkSystem{})
 	sc2.AddSystem(&KillPlayerSystem{})
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		sc2.Run()
 	}
 }

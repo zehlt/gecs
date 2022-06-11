@@ -1,9 +1,6 @@
 package snapshot
 
 import (
-	"fmt"
-	"reflect"
-
 	"github.com/zehlt/gecs"
 	"github.com/zehlt/gecs/component"
 )
@@ -29,6 +26,7 @@ type Player struct {
 }
 
 type Serializer interface {
+	Register(c interface{})
 	Serialize(w gecs.World) ([]byte, error)
 	Deserialize([]byte) (gecs.World, error)
 }
@@ -41,6 +39,10 @@ func NewSerializer() Serializer {
 
 type serializer struct {
 	encoder Encoder
+}
+
+func (s *serializer) Register(c interface{}) {
+	s.encoder.Register(c)
 }
 
 func (s *serializer) Serialize(w gecs.World) ([]byte, error) {
@@ -70,17 +72,16 @@ func (s *serializer) Deserialize(data []byte) (gecs.World, error) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(e)
 
 		components := snap.Comps[i]
 		for j := 0; j < len(components); j++ {
-			p := reflect.New(reflect.TypeOf(components[j]))
-			p.Elem().Set(reflect.ValueOf(components[j]))
-			comp := p.Interface()
+			// p := reflect.New(reflect.TypeOf(components[j]))
+			// p.Elem().Set(reflect.ValueOf(components[j]))
+			// comp := p.Interface()
 
 			// TODO: made the container not specific
-			w.RegisterComponent(comp, component.SPARSE_ARRAY_CONTAINER)
-			w.AddComponent(e, comp)
+			w.RegisterComponent(components[j], component.SPARSE_ARRAY_CONTAINER)
+			w.AddComponent(e, components[j])
 		}
 	}
 

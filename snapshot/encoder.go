@@ -18,8 +18,8 @@ func NewGobEncoder() Encoder {
 type encoder struct {
 }
 
-func (e *encoder) Register(interface{}) {
-	// nothing
+func (e *encoder) Register(c interface{}) {
+	gob.Register(c)
 }
 
 func (e *encoder) Encode(s Snap) ([]byte, error) {
