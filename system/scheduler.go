@@ -1,41 +1,42 @@
 package system
 
 import (
+	"fmt"
+
 	"github.com/zehlt/gecs"
 	"github.com/zehlt/gecs/command"
 	"github.com/zehlt/gecs/query"
 )
 
-type QSystem struct {
-	q query.Query
-	s System
+type Scheduler interface {
+	AddSystem(system System)
+	Run(w gecs.World)
 }
 
-type Scheduler struct {
-	ctl     command.Controller
-	qm      query.QueryMaker
-	w       gecs.World
-	systems []QSystem
+type scheduler struct {
+	systems []System
 }
 
-func NewScheduler(w gecs.World) Scheduler {
-	return Scheduler{
-		w:       w,
-		qm:      query.NewQueryMaker(w),
-		systems: make([]QSystem, 0),
-		ctl:     command.NewController(w),
+func NewScheduler() Scheduler {
+	return &scheduler{
+		systems: make([]System, 0),
 	}
 }
 
-func (s *Scheduler) AddSystem(system System) {
-	query := system.Init(s.qm)
-
-	s.systems = append(s.systems, QSystem{q: query, s: system})
+func (s *scheduler) AddSystem(system System) {
+	s.systems = append(s.systems, system)
 }
 
-func (s Scheduler) Run() {
-	for _, system := range s.systems {
-		system.s.Exec(s.ctl, system.q)
-		s.ctl.Execute()
+// TODO: should optimize that
+func (s *scheduler) Run(w gecs.World) {
+	fmt.Println(len(s.systems))
+
+	qm := query.NewQueryMaker(w)
+	ctl := command.NewController(w)
+
+	for _, sys := range s.systems {
+		query := sys.Init(qm)
+		sys.Exec(ctl, query)
+		ctl.Execute()
 	}
 }

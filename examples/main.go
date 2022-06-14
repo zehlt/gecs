@@ -42,7 +42,6 @@ type Renderer struct {
 }
 
 func main() {
-
 	// // Testing
 	world := gecs.DefaultWorld()
 	world.RegisterComponent(&Position{}, component.SPARSE_ARRAY_CONTAINER)
@@ -92,12 +91,6 @@ func main() {
 	world.AddComponent(e3, &Life{HP: 300})
 	world.AddComponent(e3, &Speed{V: 300, A: 3000})
 
-	// SCHEDULER EXAMPLE
-	// sc := system.NewScheduler(world)
-	// sc.AddSystem(&MoveSystem{})
-	// sc.AddSystem(&EnemyBarkSystem{})
-	// sc.AddSystem(&KillPlayerSystem{})
-
 	fmt.Println("--- SERIALIZE ---")
 	serial := snapshot.NewSerializer()
 	serial.Register(&Position{})
@@ -115,6 +108,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(w2)
 
 	ents := w2.GetAllEntities()
 	for _, e := range ents {
@@ -122,12 +116,12 @@ func main() {
 		fmt.Println("c", cs)
 	}
 
-	sc2 := system.NewScheduler(w2)
+	sc2 := system.NewScheduler()
 	sc2.AddSystem(&MoveSystem{})
 	sc2.AddSystem(&EnemyBarkSystem{})
 	sc2.AddSystem(&KillPlayerSystem{})
 
 	for i := 0; i < 10; i++ {
-		sc2.Run()
+		sc2.Run(w2)
 	}
 }

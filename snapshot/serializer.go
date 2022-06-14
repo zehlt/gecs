@@ -29,6 +29,7 @@ type Serializer interface {
 	Register(c interface{})
 	Serialize(w gecs.World) ([]byte, error)
 	Deserialize([]byte) (gecs.World, error)
+	Merge([]byte, gecs.World) error
 }
 
 func NewSerializer() Serializer {
@@ -46,6 +47,7 @@ func (s *serializer) Register(c interface{}) {
 }
 
 func (s *serializer) Serialize(w gecs.World) ([]byte, error) {
+
 	entities := w.GetAllEntities()
 
 	var snap Snap
@@ -67,23 +69,49 @@ func (s *serializer) Deserialize(data []byte) (gecs.World, error) {
 	}
 	w := gecs.DefaultWorld()
 
-	for i := 0; i < len(snap.Comps); i++ {
+	for _, components := range snap.Comps {
 		e, err := w.CreateEntity()
 		if err != nil {
 			panic(err)
 		}
 
-		components := snap.Comps[i]
-		for j := 0; j < len(components); j++ {
-			// p := reflect.New(reflect.TypeOf(components[j]))
-			// p.Elem().Set(reflect.ValueOf(components[j]))
-			// comp := p.Interface()
-
-			// TODO: made the container not specific
-			w.RegisterComponent(components[j], component.SPARSE_ARRAY_CONTAINER)
-			w.AddComponent(e, components[j])
+		for _, c := range components {
+			w.RegisterComponent(c, component.SPARSE_ARRAY_CONTAINER)
+			w.AddComponent(e, c)
 		}
 	}
 
 	return w, nil
 }
+
+func (s *serializer) Merge(data []byte, w gecs.World) error {
+
+	// snap, err := s.encoder.Decode(data)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// for i := 0; i < len(snap.Comps); i++ {
+	// 	// e, err := w.CreateEntity()
+	// 	// if err != nil {
+	// 	// 	panic(err)
+	// 	// }
+
+	// 	// components := snap.Comps[i]
+	// 	// for j := 0; j < len(components); j++ {
+	// 	// 	// p := reflect.New(reflect.TypeOf(components[j]))
+	// 	// 	// p.Elem().Set(reflect.ValueOf(components[j]))
+	// 	// 	// comp := p.Interface()
+
+	// 	// 	// TODO: made the container not specific
+	// 	// 	w.RegisterComponent(components[j], component.SPARSE_ARRAY_CONTAINER)
+	// 	// 	w.AddComponent(e, components[j])
+	// 	// }
+	// }
+
+	return nil
+}
+
+// p := reflect.New(reflect.TypeOf(components[j]))
+// p.Elem().Set(reflect.ValueOf(components[j]))
+// comp := p.Interface()
