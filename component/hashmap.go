@@ -22,6 +22,10 @@ func (h *hashmap) Add(e entity.Entity, c interface{}) error {
 	return nil
 }
 
+func (h *hashmap) Emplace(e entity.Entity, c interface{}) {
+	h.m[e.Id()] = c
+}
+
 func (h *hashmap) Remove(e entity.Entity) error {
 	if !h.Has(e) {
 		return ErrEntityDoesNotHaveComponent

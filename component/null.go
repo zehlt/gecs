@@ -16,6 +16,9 @@ func (n *Null) Add(e entity.Entity, c interface{}) error {
 	return nil
 }
 
+func (n *Null) Emplace(e entity.Entity, c interface{}) {
+}
+
 func (n *Null) Remove(e entity.Entity) error {
 	return nil
 }

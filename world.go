@@ -16,6 +16,7 @@ type World interface {
 
 	RegisterComponent(interface{}, component.ContainerType) error
 	AddComponent(entity.Entity, interface{}) error
+	EmplaceComponent(entity.Entity, interface{}) error
 	RemoveComponent(entity.Entity, interface{}) error
 	GetComponent(entity.Entity, interface{}) (interface{}, error)
 	GetComponentById(entity.Entity, component.ComponentId) (interface{}, error)
@@ -100,6 +101,23 @@ func (w *world) AddComponent(e entity.Entity, c interface{}) error {
 	}
 
 	return w.store.Add(e, componenId, c)
+}
+
+func (w *world) EmplaceComponent(e entity.Entity, c interface{}) error {
+	if !w.arena.Exists(e) {
+		return entity.ErrEntityDoesNotExist
+	}
+
+	componenId := w.registry.GetComponentId(c)
+
+	err := w.registry.AddComponent(e, componenId)
+	if err != nil {
+		// TODO: add layer of info in error
+		return err
+	}
+
+	w.store.Emplace(e, componenId, c)
+	return nil
 }
 
 func (w *world) RemoveComponent(e entity.Entity, c interface{}) error {

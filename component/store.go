@@ -17,6 +17,7 @@ type ComponentId int
 type Store interface {
 	Register(ComponentId, ContainerType) error
 	Add(entity.Entity, ComponentId, interface{}) error
+	Emplace(entity.Entity, ComponentId, interface{})
 	Remove(entity.Entity, ComponentId) error
 	RemoveAll(entity.Entity) error
 	Get(entity.Entity, ComponentId) (interface{}, error)
@@ -60,6 +61,10 @@ func (s *defaultStore) Register(id ComponentId, t ContainerType) error {
 
 func (s *defaultStore) Add(e entity.Entity, id ComponentId, c interface{}) error {
 	return s.containers[id].Add(e, c)
+}
+
+func (s *defaultStore) Emplace(e entity.Entity, id ComponentId, c interface{}) {
+	s.containers[id].Emplace(e, c)
 }
 
 func (s *defaultStore) Remove(e entity.Entity, id ComponentId) error {

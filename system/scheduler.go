@@ -1,8 +1,6 @@
 package system
 
 import (
-	"fmt"
-
 	"github.com/zehlt/gecs"
 	"github.com/zehlt/gecs/command"
 	"github.com/zehlt/gecs/query"
@@ -29,8 +27,6 @@ func (s *scheduler) AddSystem(system System) {
 
 // TODO: should optimize that
 func (s *scheduler) Run(w gecs.World) {
-	fmt.Println(len(s.systems))
-
 	qm := query.NewQueryMaker(w)
 	ctl := command.NewController(w)
 

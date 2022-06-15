@@ -30,6 +30,16 @@ func (s *sparseArray) Add(e entity.Entity, c interface{}) error {
 	return nil
 }
 
+func (s *sparseArray) Emplace(e entity.Entity, c interface{}) {
+	if e.Id() >= len(s.components) {
+		for i := e.Id() - len(s.components); i >= 0; i-- {
+			s.components = append(s.components, nil)
+		}
+	}
+
+	s.components[e.Id()] = c
+}
+
 func (s *sparseArray) Remove(e entity.Entity) error {
 	if !s.Has(e) {
 		return ErrEntityDoesNotHaveComponent
