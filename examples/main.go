@@ -121,7 +121,17 @@ func main() {
 	sc2.AddSystem(&EnemyBarkSystem{})
 	sc2.AddSystem(&KillPlayerSystem{})
 
+	sc2.AddReceiver(&InputReceiver{})
+	sc2.AddReceiver(&HealUserReceiver{})
+
 	for i := 0; i < 10; i++ {
 		sc2.Run(w2)
 	}
+
+	sc2.Signal(MovePlayerSignal{}, w2)
+	sc2.Signal(NothingSignal{}, w2)
+	sc2.Signal(MovePlayerSignal{}, w2)
+	sc2.Signal(MovePlayerSignal{}, w2)
+	sc2.Signal(HealUserSignal{}, w2)
+	sc2.Signal(MovePlayerSignal{}, w2)
 }
