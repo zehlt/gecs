@@ -4,6 +4,16 @@ import (
 	"reflect"
 )
 
+type System interface {
+	Init(qm QueryMaker) Query
+	Exec(cmd Controller, q Query)
+}
+
+type Receiver interface {
+	Init() interface{}
+	Exec(cmd Controller, signal interface{})
+}
+
 type Scheduler interface {
 	AddSystem(system System)
 	Run(w World)
@@ -36,7 +46,7 @@ func (s *scheduler) AddReceiver(signal Receiver) {
 
 func (s *scheduler) Signal(signal interface{}, w World) {
 	sign, ok := s.signals[reflect.TypeOf(signal)]
-	ctl := NewController(w)
+	ctl := newController(w)
 
 	if ok {
 		sign.Exec(ctl, signal)
@@ -46,7 +56,7 @@ func (s *scheduler) Signal(signal interface{}, w World) {
 // TODO: should optimize that
 func (s *scheduler) Run(w World) {
 	qm := NewQueryMaker(w)
-	ctl := NewController(w)
+	ctl := newController(w)
 
 	for _, sys := range s.systems {
 		query := sys.Init(qm)

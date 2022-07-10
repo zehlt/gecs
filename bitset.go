@@ -5,17 +5,17 @@ import (
 	"strings"
 )
 
-type Bitset struct {
+type bitset struct {
 	bytes []uint8
 }
 
-func NewBitset() *Bitset {
-	return &Bitset{
+func newBitset() *bitset {
+	return &bitset{
 		bytes: make([]uint8, 0),
 	}
 }
 
-func (b *Bitset) Get(n int) bool {
+func (b *bitset) Get(n int) bool {
 	// TODO: negative numbers
 	if n >= len(b.bytes)*8 {
 		return false
@@ -27,7 +27,7 @@ func (b *Bitset) Get(n int) bool {
 	return (b.bytes[byteIndex] & (1 << bitPosition)) != 0
 }
 
-func (b *Bitset) Set(n int, val bool) {
+func (b *bitset) Set(n int, val bool) {
 	byteIndex := n / 8
 	bitPosition := n % 8
 
@@ -45,7 +45,7 @@ func (b *Bitset) Set(n int, val bool) {
 	}
 }
 
-func (b *Bitset) Include(other *Bitset) bool {
+func (b *bitset) Include(other *bitset) bool {
 	if other.Len() > b.Len() {
 		return false
 	}
@@ -59,7 +59,7 @@ func (b *Bitset) Include(other *Bitset) bool {
 	return true
 }
 
-func (b *Bitset) Contains(matcher *Bitset) bool {
+func (b *bitset) Contains(matcher *bitset) bool {
 	// TODO: the other may be longer with only 00000
 	if matcher.Len() > b.Len() {
 		return false
@@ -80,7 +80,7 @@ func (b *Bitset) Contains(matcher *Bitset) bool {
 	return true
 }
 
-func (b *Bitset) Equal(other *Bitset) bool {
+func (b *bitset) Equal(other *bitset) bool {
 	if b.Len() != other.Len() {
 		return false
 	}
@@ -94,11 +94,11 @@ func (b *Bitset) Equal(other *Bitset) bool {
 	return true
 }
 
-func (b *Bitset) Len() int {
+func (b *bitset) Len() int {
 	return len(b.bytes)
 }
 
-func (b *Bitset) String() string {
+func (b *bitset) String() string {
 	var sb strings.Builder
 
 	for i := len(b.bytes) - 1; i >= 0; i-- {

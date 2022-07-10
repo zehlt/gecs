@@ -8,16 +8,29 @@ type Controller interface {
 	Execute()
 }
 
+type command interface {
+	Execute(w World)
+}
+
+// type destroyEntityCommand struct {
+// 	e Entity
+// }
+
+// func (c *destroyEntityCommand) Execute(w World) {
+// 	fmt.Println("DESTROY ENTITY!!")
+// 	w.DestroyEntity(c.e)
+// }
+
 type controller struct {
 	w World
 	// TODO: maybe switch from slice to queue
-	commands []Command
+	commands []command
 }
 
-func NewController(w World) Controller {
+func newController(w World) Controller {
 	return &controller{
 		w:        w,
-		commands: make([]Command, 0),
+		commands: make([]command, 0),
 	}
 }
 
@@ -62,5 +75,5 @@ func (c *controller) Execute() {
 		cmd.Execute(c.w)
 	}
 
-	c.commands = make([]Command, 0)
+	c.commands = make([]command, 0)
 }

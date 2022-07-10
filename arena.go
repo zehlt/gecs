@@ -9,87 +9,101 @@ var (
 	ErrInternalUnableToCreateEntity = errors.New("internal error: unable to create an entity")
 )
 
-type Arena interface {
+type entityCellType int
+
+const (
+	EMPTY_CELL entityCellType = iota
+	END_CELL
+	OCCUPIED_CELL
+)
+
+type entityCell struct {
+	t          entityCellType
+	generation uint64
+	next       int
+}
+
+type arena interface {
 	Create() (Entity, error)
 	Destroy(Entity) error
 	Exists(Entity) bool
 	GetAll() []Entity
 }
 
-type arena struct {
-	cells       []EntityCell
+type defaultArena struct {
+	cells       []entityCell
 	current_gen uint64
 	first_free  int
 }
 
-func NewArena() Arena {
-	c := make([]EntityCell, 1)
+func newArena() arena {
+	c := make([]entityCell, 1)
 
-	c[0] = EntityCell{
+	c[0] = entityCell{
 		t: END_CELL,
 	}
 
-	return &arena{
+	return &defaultArena{
 		cells:       c,
 		current_gen: 0,
 		first_free:  0,
 	}
 }
 
-func (arena *arena) Create() (Entity, error) {
-	e := arena.cells[arena.first_free]
+func (a *defaultArena) Create() (Entity, error) {
+	e := a.cells[a.first_free]
 
 	switch e.t {
 	case EMPTY_CELL:
-		arena.cells[arena.first_free] = EntityCell{
+		a.cells[a.first_free] = entityCell{
 			t:          OCCUPIED_CELL,
-			generation: arena.current_gen,
+			generation: a.current_gen,
 		}
-		newEntity := Entity{id: arena.first_free, generation: arena.current_gen}
-		arena.first_free = e.next
+		newEntity := Entity{id: a.first_free, generation: a.current_gen}
+		a.first_free = e.next
 
 		return newEntity, nil
 
 	case END_CELL:
-		size := len(arena.cells)
+		size := len(a.cells)
 
-		arena.cells[size-1] = EntityCell{
+		a.cells[size-1] = entityCell{
 			t:          OCCUPIED_CELL,
-			generation: arena.current_gen,
+			generation: a.current_gen,
 			next:       size,
 		}
 
-		arena.cells = append(arena.cells, EntityCell{t: END_CELL})
-		arena.first_free = size
+		a.cells = append(a.cells, entityCell{t: END_CELL})
+		a.first_free = size
 
-		return Entity{id: size - 1, generation: arena.current_gen}, nil
+		return Entity{id: size - 1, generation: a.current_gen}, nil
 
 	default:
 		return Entity{}, ErrInternalUnableToCreateEntity
 	}
 }
 
-func (arena *arena) Destroy(e Entity) error {
-	if !arena.Exists(e) {
+func (a *defaultArena) Destroy(e Entity) error {
+	if !a.Exists(e) {
 		return ErrEntityDoesNotExist
 	}
 
-	arena.cells[e.id] = EntityCell{
+	a.cells[e.id] = entityCell{
 		t:    EMPTY_CELL,
-		next: arena.first_free,
+		next: a.first_free,
 	}
-	arena.current_gen++
-	arena.first_free = e.id
+	a.current_gen++
+	a.first_free = e.id
 
 	return nil
 }
 
-func (arena *arena) Exists(e Entity) bool {
-	if e.id >= len(arena.cells) {
+func (a *defaultArena) Exists(e Entity) bool {
+	if e.id >= len(a.cells) {
 		return false
 	}
 
-	cell := arena.cells[e.id]
+	cell := a.cells[e.id]
 
 	if cell.t == END_CELL || cell.t == EMPTY_CELL {
 		return false
@@ -102,12 +116,12 @@ func (arena *arena) Exists(e Entity) bool {
 	return true
 }
 
-func (arena *arena) GetAll() []Entity {
+func (a *defaultArena) GetAll() []Entity {
 
 	entities := make([]Entity, 0)
 
-	for i := 0; i < len(arena.cells); i++ {
-		cell := arena.cells[i]
+	for i := 0; i < len(a.cells); i++ {
+		cell := a.cells[i]
 
 		if cell.t == OCCUPIED_CELL {
 			entities = append(entities, Entity{id: i, generation: cell.generation})

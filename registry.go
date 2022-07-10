@@ -10,7 +10,7 @@ var (
 	ErrEntityDoesNotHaveSignature = errors.New("entity does not have a signature")
 )
 
-type Registry interface {
+type registry interface {
 	CreateEntitySignature(Entity) error
 	GetEntitySignature(Entity) (Signature, error)
 	DestroyEntitySignature(Entity) error
@@ -31,7 +31,7 @@ type defaultRegistry struct {
 	next_id ComponentId
 }
 
-func NewRegistry() Registry {
+func newRegistry() registry {
 	return &defaultRegistry{
 		signatures: make(map[Entity]Signature),
 		types:      make(map[reflect.Type]ComponentId),

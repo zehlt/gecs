@@ -12,7 +12,7 @@ var (
 
 type ComponentId int
 
-type Store interface {
+type store interface {
 	Register(ComponentId, ContainerType) error
 	Add(Entity, ComponentId, interface{}) error
 	Emplace(Entity, ComponentId, interface{})
@@ -24,12 +24,12 @@ type Store interface {
 }
 
 type defaultStore struct {
-	containers map[ComponentId]Container
+	containers map[ComponentId]container
 }
 
-func NewStore() Store {
+func newStore() store {
 	return &defaultStore{
-		containers: make(map[ComponentId]Container),
+		containers: make(map[ComponentId]container),
 	}
 }
 

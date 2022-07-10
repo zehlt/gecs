@@ -26,18 +26,18 @@ type World interface {
 }
 
 type world struct {
-	locker   Locker
-	arena    Arena
-	store    Store
-	registry Registry
+	locker   locker
+	arena    arena
+	store    store
+	registry registry
 }
 
 func DefaultWorld() World {
 	return &world{
-		locker:   NewLocker(),
-		arena:    NewArena(),
-		store:    NewStore(),
-		registry: NewRegistry(),
+		locker:   newLocker(),
+		arena:    newArena(),
+		store:    newStore(),
+		registry: newRegistry(),
 	}
 }
 

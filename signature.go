@@ -10,12 +10,12 @@ type Signature interface {
 }
 
 type signature struct {
-	bitset *Bitset
+	bitset *bitset
 }
 
 func NewSignature() Signature {
 	return &signature{
-		bitset: NewBitset(),
+		bitset: newBitset(),
 	}
 }
 
@@ -33,7 +33,7 @@ func (s *signature) HasComponent(id ComponentId) bool {
 
 func (s *signature) Contains(other Signature) bool {
 	other_data := other.GetData()
-	other_bitset := other_data.(*Bitset)
+	other_bitset := other_data.(*bitset)
 
 	return s.bitset.Contains(other_bitset)
 }

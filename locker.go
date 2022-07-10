@@ -10,23 +10,23 @@ var (
 	ErrResourceDoesNotExist  = errors.New("resource does not exist")
 )
 
-type Locker interface {
+type locker interface {
 	Add(c interface{}) error
 	Get(t interface{}) (interface{}, error)
 	Has(t interface{}) bool
 }
 
-type locker struct {
+type defaultLocker struct {
 	resources map[reflect.Type]interface{}
 }
 
-func NewLocker() Locker {
-	return &locker{
+func newLocker() locker {
+	return &defaultLocker{
 		resources: make(map[reflect.Type]interface{}),
 	}
 }
 
-func (r *locker) Add(c interface{}) error {
+func (r *defaultLocker) Add(c interface{}) error {
 	t := reflect.TypeOf(c)
 
 	_, ok := r.resources[t]
@@ -38,7 +38,7 @@ func (r *locker) Add(c interface{}) error {
 	return nil
 }
 
-func (r *locker) Get(c interface{}) (interface{}, error) {
+func (r *defaultLocker) Get(c interface{}) (interface{}, error) {
 	t := reflect.TypeOf(c)
 
 	data, ok := r.resources[t]
@@ -49,7 +49,7 @@ func (r *locker) Get(c interface{}) (interface{}, error) {
 	return data, nil
 }
 
-func (r *locker) Has(c interface{}) bool {
+func (r *defaultLocker) Has(c interface{}) bool {
 	t := reflect.TypeOf(c)
 	_, ok := r.resources[t]
 	return ok
