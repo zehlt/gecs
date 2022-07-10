@@ -1,9 +1,4 @@
-package query
-
-import (
-	"github.com/zehlt/gecs"
-	"github.com/zehlt/gecs/component"
-)
+package gecs
 
 type Access []interface{}
 type Exclude []interface{}
@@ -14,10 +9,10 @@ type QueryMaker interface {
 }
 
 type queryMaker struct {
-	w gecs.World
+	w World
 }
 
-func NewQueryMaker(w gecs.World) QueryMaker {
+func NewQueryMaker(w World) QueryMaker {
 	return &queryMaker{w: w}
 }
 
@@ -25,7 +20,7 @@ func (qm *queryMaker) Create(r Resource, a Access, e Exclude) Query {
 	access_sign := qm.w.GetSignatureFromTypes(a)
 	exclude_sign := qm.w.GetSignatureFromTypes(e)
 
-	component_ids := make([]component.ComponentId, len(a))
+	component_ids := make([]ComponentId, len(a))
 	resources := make([]interface{}, len(r))
 
 	for i, t := range a {

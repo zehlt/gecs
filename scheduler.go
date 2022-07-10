@@ -1,19 +1,15 @@
-package system
+package gecs
 
 import (
 	"reflect"
-
-	"github.com/zehlt/gecs"
-	"github.com/zehlt/gecs/command"
-	"github.com/zehlt/gecs/query"
 )
 
 type Scheduler interface {
 	AddSystem(system System)
-	Run(w gecs.World)
+	Run(w World)
 
 	AddReceiver(re Receiver)
-	Signal(signal interface{}, w gecs.World)
+	Signal(signal interface{}, w World)
 }
 
 type scheduler struct {
@@ -38,9 +34,9 @@ func (s *scheduler) AddReceiver(signal Receiver) {
 	s.signals[t] = signal
 }
 
-func (s *scheduler) Signal(signal interface{}, w gecs.World) {
+func (s *scheduler) Signal(signal interface{}, w World) {
 	sign, ok := s.signals[reflect.TypeOf(signal)]
-	ctl := command.NewController(w)
+	ctl := NewController(w)
 
 	if ok {
 		sign.Exec(ctl, signal)
@@ -48,9 +44,9 @@ func (s *scheduler) Signal(signal interface{}, w gecs.World) {
 }
 
 // TODO: should optimize that
-func (s *scheduler) Run(w gecs.World) {
-	qm := query.NewQueryMaker(w)
-	ctl := command.NewController(w)
+func (s *scheduler) Run(w World) {
+	qm := NewQueryMaker(w)
+	ctl := NewController(w)
 
 	for _, sys := range s.systems {
 		query := sys.Init(qm)

@@ -1,4 +1,4 @@
-package entity
+package gecs
 
 import "fmt"
 

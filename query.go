@@ -1,12 +1,7 @@
-package query
+package gecs
 
 import (
 	"errors"
-
-	"github.com/zehlt/gecs"
-	"github.com/zehlt/gecs/component"
-	"github.com/zehlt/gecs/entity"
-	"github.com/zehlt/gecs/signature"
 )
 
 var (
@@ -15,21 +10,21 @@ var (
 )
 
 type Query interface {
-	Entities(fn func(e entity.Entity))
-	GetComponent(e entity.Entity, n int) interface{}
+	Entities(fn func(e Entity))
+	GetComponent(e Entity, n int) interface{}
 	GetResource(n int) interface{}
 }
 
 type query struct {
-	w             gecs.World
-	component_ids []component.ComponentId
+	w             World
+	component_ids []ComponentId
 	resources     []interface{}
 
-	access_sign  signature.Signature
-	exclude_sign signature.Signature
+	access_sign  Signature
+	exclude_sign Signature
 }
 
-func (q *query) Entities(fn func(e entity.Entity)) {
+func (q *query) Entities(fn func(e Entity)) {
 	entities := q.w.FindMatchingEntities(q.access_sign)
 
 	for _, entity := range entities {
@@ -37,7 +32,7 @@ func (q *query) Entities(fn func(e entity.Entity)) {
 	}
 }
 
-func (q *query) GetComponent(e entity.Entity, n int) interface{} {
+func (q *query) GetComponent(e Entity, n int) interface{} {
 	if n >= len(q.component_ids) {
 		panic(ErrQueryComponentPositionTooBig)
 	}

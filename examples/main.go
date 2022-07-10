@@ -4,9 +4,6 @@ import (
 	"fmt"
 
 	"github.com/zehlt/gecs"
-	"github.com/zehlt/gecs/component"
-	"github.com/zehlt/gecs/snapshot"
-	"github.com/zehlt/gecs/system"
 )
 
 type Position struct {
@@ -44,11 +41,11 @@ type Renderer struct {
 func main() {
 	// // Testing
 	world := gecs.DefaultWorld()
-	world.RegisterComponent(&Position{}, component.SPARSE_ARRAY_CONTAINER)
-	world.RegisterComponent(&Speed{}, component.HASHMAP_CONTAINER)
-	world.RegisterComponent(&Life{}, component.HASHMAP_CONTAINER)
-	world.RegisterComponent(&Enemy{}, component.NULL_CONTAINER)
-	world.RegisterComponent(&Player{}, component.NULL_CONTAINER)
+	world.RegisterComponent(&Position{}, gecs.SPARSE_ARRAY_CONTAINER)
+	world.RegisterComponent(&Speed{}, gecs.HASHMAP_CONTAINER)
+	world.RegisterComponent(&Life{}, gecs.HASHMAP_CONTAINER)
+	world.RegisterComponent(&Enemy{}, gecs.NULL_CONTAINER)
+	world.RegisterComponent(&Player{}, gecs.NULL_CONTAINER)
 
 	err := world.AddResource(Renderer{x: 12})
 	if err != nil {
@@ -92,7 +89,7 @@ func main() {
 	world.AddComponent(e3, &Speed{V: 300, A: 3000})
 
 	fmt.Println("--- SERIALIZE ---")
-	serial := snapshot.NewSerializer()
+	serial := gecs.NewSerializer()
 	serial.Register(&Position{})
 	serial.Register(&Speed{})
 	serial.Register(&Life{})
@@ -116,7 +113,7 @@ func main() {
 		fmt.Println("c", cs)
 	}
 
-	sc2 := system.NewScheduler()
+	sc2 := gecs.NewScheduler()
 	sc2.AddSystem(&MoveSystem{})
 	sc2.AddSystem(&EnemyBarkSystem{})
 	sc2.AddSystem(&KillPlayerSystem{})

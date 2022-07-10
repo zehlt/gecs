@@ -3,20 +3,18 @@ package main
 import (
 	"fmt"
 
-	"github.com/zehlt/gecs/command"
-	"github.com/zehlt/gecs/entity"
-	"github.com/zehlt/gecs/query"
+	"github.com/zehlt/gecs"
 )
 
 type MoveSystem struct {
 }
 
-func (s *MoveSystem) Init(qm query.QueryMaker) query.Query {
-	return qm.Create(query.Resource{}, query.Access{&Position{}, &Speed{}}, query.Exclude{})
+func (s *MoveSystem) Init(qm gecs.QueryMaker) gecs.Query {
+	return qm.Create(gecs.Resource{}, gecs.Access{&Position{}, &Speed{}}, gecs.Exclude{})
 }
 
-func (s *MoveSystem) Exec(cmd command.Controller, q query.Query) {
-	q.Entities(func(e entity.Entity) {
+func (s *MoveSystem) Exec(cmd gecs.Controller, q gecs.Query) {
+	q.Entities(func(e gecs.Entity) {
 		// pos, _ := q.GetComponent(e, 0).(*Position)
 		// spd, _ := q.GetComponent(e, 1).(*Speed)
 
@@ -29,13 +27,13 @@ func (s *MoveSystem) Exec(cmd command.Controller, q query.Query) {
 type EnemyBarkSystem struct {
 }
 
-func (s *EnemyBarkSystem) Init(qm query.QueryMaker) query.Query {
-	return qm.Create(query.Resource{}, query.Access{&Life{}}, query.Exclude{})
+func (s *EnemyBarkSystem) Init(qm gecs.QueryMaker) gecs.Query {
+	return qm.Create(gecs.Resource{}, gecs.Access{&Life{}}, gecs.Exclude{})
 }
 
-func (s *EnemyBarkSystem) Exec(cmd command.Controller, q query.Query) {
+func (s *EnemyBarkSystem) Exec(cmd gecs.Controller, q gecs.Query) {
 
-	q.Entities(func(e entity.Entity) {
+	q.Entities(func(e gecs.Entity) {
 		life := q.GetComponent(e, 0).(*Life)
 		life.HP -= 10
 		fmt.Println("Life Left:", life)
@@ -47,13 +45,13 @@ func (s *EnemyBarkSystem) Exec(cmd command.Controller, q query.Query) {
 type KillPlayerSystem struct {
 }
 
-func (s *KillPlayerSystem) Init(qm query.QueryMaker) query.Query {
-	return qm.Create(query.Resource{}, query.Access{&Life{}, &Player{}}, query.Exclude{})
+func (s *KillPlayerSystem) Init(qm gecs.QueryMaker) gecs.Query {
+	return qm.Create(gecs.Resource{}, gecs.Access{&Life{}, &Player{}}, gecs.Exclude{})
 }
 
-func (s *KillPlayerSystem) Exec(cmd command.Controller, q query.Query) {
+func (s *KillPlayerSystem) Exec(cmd gecs.Controller, q gecs.Query) {
 
-	q.Entities(func(e entity.Entity) {
+	q.Entities(func(e gecs.Entity) {
 		player_life := q.GetComponent(e, 0).(*Life)
 
 		if player_life.HP < 0 {

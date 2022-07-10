@@ -1,9 +1,4 @@
-package snapshot
-
-import (
-	"github.com/zehlt/gecs"
-	"github.com/zehlt/gecs/component"
-)
+package gecs
 
 type Position struct {
 	X int
@@ -27,9 +22,9 @@ type Player struct {
 
 type Serializer interface {
 	Register(c interface{})
-	Serialize(w gecs.World) ([]byte, error)
-	Deserialize([]byte) (gecs.World, error)
-	Merge([]byte, gecs.World) error
+	Serialize(w World) ([]byte, error)
+	Deserialize([]byte) (World, error)
+	Merge([]byte, World) error
 }
 
 func NewSerializer() Serializer {
@@ -46,7 +41,7 @@ func (s *serializer) Register(c interface{}) {
 	s.encoder.Register(c)
 }
 
-func (s *serializer) Serialize(w gecs.World) ([]byte, error) {
+func (s *serializer) Serialize(w World) ([]byte, error) {
 
 	entities := w.GetAllEntities()
 
@@ -62,12 +57,12 @@ func (s *serializer) Serialize(w gecs.World) ([]byte, error) {
 	return s.encoder.Encode(snap)
 }
 
-func (s *serializer) Deserialize(data []byte) (gecs.World, error) {
+func (s *serializer) Deserialize(data []byte) (World, error) {
 	snap, err := s.encoder.Decode(data)
 	if err != nil {
 		panic(err)
 	}
-	w := gecs.DefaultWorld()
+	w := DefaultWorld()
 
 	for _, components := range snap.Comps {
 		e, err := w.CreateEntity()
@@ -76,7 +71,7 @@ func (s *serializer) Deserialize(data []byte) (gecs.World, error) {
 		}
 
 		for _, c := range components {
-			w.RegisterComponent(c, component.SPARSE_ARRAY_CONTAINER)
+			w.RegisterComponent(c, SPARSE_ARRAY_CONTAINER)
 			w.AddComponent(e, c)
 		}
 	}
@@ -84,7 +79,7 @@ func (s *serializer) Deserialize(data []byte) (gecs.World, error) {
 	return w, nil
 }
 
-func (s *serializer) Merge(data []byte, w gecs.World) error {
+func (s *serializer) Merge(data []byte, w World) error {
 
 	// snap, err := s.encoder.Decode(data)
 	// if err != nil {
@@ -104,7 +99,7 @@ func (s *serializer) Merge(data []byte, w gecs.World) error {
 	// 	// 	// comp := p.Interface()
 
 	// 	// 	// TODO: made the container not specific
-	// 	// 	w.RegisterComponent(components[j], component.SPARSE_ARRAY_CONTAINER)
+	// 	// 	w.RegisterComponent(components[j], SPARSE_ARRAY_CONTAINER)
 	// 	// 	w.AddComponent(e, components[j])
 	// 	// }
 	// }

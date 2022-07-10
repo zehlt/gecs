@@ -1,6 +1,4 @@
-package component
-
-import "github.com/zehlt/gecs/entity"
+package gecs
 
 type hashmap struct {
 	m map[int]interface{}
@@ -12,7 +10,7 @@ func newHashmap() Container {
 	}
 }
 
-func (h *hashmap) Add(e entity.Entity, c interface{}) error {
+func (h *hashmap) Add(e Entity, c interface{}) error {
 	if h.Has(e) {
 		return ErrEntityAlreadyHasComponent
 	}
@@ -22,11 +20,11 @@ func (h *hashmap) Add(e entity.Entity, c interface{}) error {
 	return nil
 }
 
-func (h *hashmap) Emplace(e entity.Entity, c interface{}) {
+func (h *hashmap) Emplace(e Entity, c interface{}) {
 	h.m[e.Id()] = c
 }
 
-func (h *hashmap) Remove(e entity.Entity) error {
+func (h *hashmap) Remove(e Entity) error {
 	if !h.Has(e) {
 		return ErrEntityDoesNotHaveComponent
 	}
@@ -36,7 +34,7 @@ func (h *hashmap) Remove(e entity.Entity) error {
 	return nil
 }
 
-func (h *hashmap) Get(e entity.Entity) (interface{}, error) {
+func (h *hashmap) Get(e Entity) (interface{}, error) {
 	if !h.Has(e) {
 		return nil, ErrEntityDoesNotHaveComponent
 	}
@@ -44,7 +42,7 @@ func (h *hashmap) Get(e entity.Entity) (interface{}, error) {
 	return h.m[e.Id()], nil
 }
 
-func (h *hashmap) Has(e entity.Entity) bool {
+func (h *hashmap) Has(e Entity) bool {
 	_, ok := h.m[e.Id()]
 
 	return ok

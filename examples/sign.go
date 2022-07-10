@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/zehlt/gecs/command"
+	"github.com/zehlt/gecs"
 )
 
 type MovePlayerSignal struct {
@@ -28,7 +28,7 @@ func (s *InputReceiver) Init() interface{} {
 	return MovePlayerSignal{}
 }
 
-func (s *InputReceiver) Exec(cmd command.Controller, d interface{}) {
+func (s *InputReceiver) Exec(cmd gecs.Controller, d interface{}) {
 	fmt.Println("SIGNAL CALLED!!", d)
 }
 
@@ -41,6 +41,6 @@ func (s *HealUserReceiver) Init() interface{} {
 	return HealUserSignal{}
 }
 
-func (s *HealUserReceiver) Exec(cmd command.Controller, d interface{}) {
+func (s *HealUserReceiver) Exec(cmd gecs.Controller, d interface{}) {
 	fmt.Println("HEAL CALLEd!!", d)
 }

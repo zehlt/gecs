@@ -1,11 +1,8 @@
-package signature
+package gecs
 
 import (
 	"errors"
 	"reflect"
-
-	"github.com/zehlt/gecs/component"
-	"github.com/zehlt/gecs/entity"
 )
 
 var (
@@ -14,35 +11,35 @@ var (
 )
 
 type Registry interface {
-	CreateEntitySignature(entity.Entity) error
-	GetEntitySignature(entity.Entity) (Signature, error)
-	DestroyEntitySignature(entity.Entity) error
+	CreateEntitySignature(Entity) error
+	GetEntitySignature(Entity) (Signature, error)
+	DestroyEntitySignature(Entity) error
 
-	AddComponent(entity.Entity, component.ComponentId) error
-	RemoveComponent(entity.Entity, component.ComponentId) error
-	HasComponent(entity.Entity, component.ComponentId) bool
-	GetComponentId(c interface{}) component.ComponentId
+	AddComponent(Entity, ComponentId) error
+	RemoveComponent(Entity, ComponentId) error
+	HasComponent(Entity, ComponentId) bool
+	GetComponentId(c interface{}) ComponentId
 
 	GetSignatureFromTypes([]interface{}) Signature
-	FindMatchingEntities(Signature) []entity.Entity
+	FindMatchingEntities(Signature) []Entity
 }
 
 type defaultRegistry struct {
-	signatures map[entity.Entity]Signature
+	signatures map[Entity]Signature
 
-	types   map[reflect.Type]component.ComponentId
-	next_id component.ComponentId
+	types   map[reflect.Type]ComponentId
+	next_id ComponentId
 }
 
 func NewRegistry() Registry {
 	return &defaultRegistry{
-		signatures: make(map[entity.Entity]Signature),
-		types:      make(map[reflect.Type]component.ComponentId),
+		signatures: make(map[Entity]Signature),
+		types:      make(map[reflect.Type]ComponentId),
 		next_id:    0,
 	}
 }
 
-func (r *defaultRegistry) CreateEntitySignature(e entity.Entity) error {
+func (r *defaultRegistry) CreateEntitySignature(e Entity) error {
 	_, ok := r.signatures[e]
 	if ok {
 		return ErrEntityAlreadyHasSignature
@@ -53,7 +50,7 @@ func (r *defaultRegistry) CreateEntitySignature(e entity.Entity) error {
 	return nil
 }
 
-func (r *defaultRegistry) GetEntitySignature(e entity.Entity) (Signature, error) {
+func (r *defaultRegistry) GetEntitySignature(e Entity) (Signature, error) {
 	sign, ok := r.signatures[e]
 	if !ok {
 		return nil, ErrEntityDoesNotHaveSignature
@@ -62,7 +59,7 @@ func (r *defaultRegistry) GetEntitySignature(e entity.Entity) (Signature, error)
 	return sign, nil
 }
 
-func (r *defaultRegistry) DestroyEntitySignature(e entity.Entity) error {
+func (r *defaultRegistry) DestroyEntitySignature(e Entity) error {
 	_, ok := r.signatures[e]
 	if !ok {
 		return ErrEntityDoesNotHaveSignature
@@ -72,7 +69,7 @@ func (r *defaultRegistry) DestroyEntitySignature(e entity.Entity) error {
 	return nil
 }
 
-func (r *defaultRegistry) AddComponent(e entity.Entity, id component.ComponentId) error {
+func (r *defaultRegistry) AddComponent(e Entity, id ComponentId) error {
 	sign, ok := r.signatures[e]
 	if !ok {
 		return ErrEntityDoesNotHaveSignature
@@ -82,7 +79,7 @@ func (r *defaultRegistry) AddComponent(e entity.Entity, id component.ComponentId
 	return nil
 }
 
-func (r *defaultRegistry) RemoveComponent(e entity.Entity, id component.ComponentId) error {
+func (r *defaultRegistry) RemoveComponent(e Entity, id ComponentId) error {
 	sign, ok := r.signatures[e]
 	if !ok {
 		return ErrEntityDoesNotHaveSignature
@@ -93,7 +90,7 @@ func (r *defaultRegistry) RemoveComponent(e entity.Entity, id component.Componen
 	return nil
 }
 
-func (r *defaultRegistry) HasComponent(e entity.Entity, id component.ComponentId) bool {
+func (r *defaultRegistry) HasComponent(e Entity, id ComponentId) bool {
 	sign, ok := r.signatures[e]
 	if !ok {
 		return false
@@ -102,7 +99,7 @@ func (r *defaultRegistry) HasComponent(e entity.Entity, id component.ComponentId
 	return sign.HasComponent(id)
 }
 
-func (r *defaultRegistry) GetComponentId(c interface{}) component.ComponentId {
+func (r *defaultRegistry) GetComponentId(c interface{}) ComponentId {
 	t := reflect.TypeOf(c)
 
 	id, ok := r.types[t]
@@ -126,8 +123,8 @@ func (r *defaultRegistry) GetSignatureFromTypes(types []interface{}) Signature {
 	return sign
 }
 
-func (r *defaultRegistry) FindMatchingEntities(matcher Signature) []entity.Entity {
-	entities := make([]entity.Entity, 0)
+func (r *defaultRegistry) FindMatchingEntities(matcher Signature) []Entity {
+	entities := make([]Entity, 0)
 
 	for e, s := range r.signatures {
 		if s.Contains(matcher) {

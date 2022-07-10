@@ -1,13 +1,9 @@
-package signature
-
-import (
-	"github.com/zehlt/gecs/component"
-)
+package gecs
 
 type Signature interface {
-	AddComponent(id component.ComponentId)
-	RemoveComponent(id component.ComponentId)
-	HasComponent(id component.ComponentId) bool
+	AddComponent(id ComponentId)
+	RemoveComponent(id ComponentId)
+	HasComponent(id ComponentId) bool
 	Contains(Signature) bool
 	GetData() interface{}
 	String() string
@@ -23,15 +19,15 @@ func NewSignature() Signature {
 	}
 }
 
-func (s *signature) AddComponent(id component.ComponentId) {
+func (s *signature) AddComponent(id ComponentId) {
 	s.bitset.Set(int(id), true)
 }
 
-func (s *signature) RemoveComponent(id component.ComponentId) {
+func (s *signature) RemoveComponent(id ComponentId) {
 	s.bitset.Set(int(id), false)
 }
 
-func (s *signature) HasComponent(id component.ComponentId) bool {
+func (s *signature) HasComponent(id ComponentId) bool {
 	return s.bitset.Get(int(id))
 }
 

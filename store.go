@@ -1,9 +1,7 @@
-package component
+package gecs
 
 import (
 	"errors"
-
-	"github.com/zehlt/gecs/entity"
 )
 
 var (
@@ -16,13 +14,13 @@ type ComponentId int
 
 type Store interface {
 	Register(ComponentId, ContainerType) error
-	Add(entity.Entity, ComponentId, interface{}) error
-	Emplace(entity.Entity, ComponentId, interface{})
-	Remove(entity.Entity, ComponentId) error
-	RemoveAll(entity.Entity) error
-	Get(entity.Entity, ComponentId) (interface{}, error)
-	GetAll(entity.Entity) []interface{}
-	Has(entity.Entity, ComponentId) bool
+	Add(Entity, ComponentId, interface{}) error
+	Emplace(Entity, ComponentId, interface{})
+	Remove(Entity, ComponentId) error
+	RemoveAll(Entity) error
+	Get(Entity, ComponentId) (interface{}, error)
+	GetAll(Entity) []interface{}
+	Has(Entity, ComponentId) bool
 }
 
 type defaultStore struct {
@@ -59,19 +57,19 @@ func (s *defaultStore) Register(id ComponentId, t ContainerType) error {
 	}
 }
 
-func (s *defaultStore) Add(e entity.Entity, id ComponentId, c interface{}) error {
+func (s *defaultStore) Add(e Entity, id ComponentId, c interface{}) error {
 	return s.containers[id].Add(e, c)
 }
 
-func (s *defaultStore) Emplace(e entity.Entity, id ComponentId, c interface{}) {
+func (s *defaultStore) Emplace(e Entity, id ComponentId, c interface{}) {
 	s.containers[id].Emplace(e, c)
 }
 
-func (s *defaultStore) Remove(e entity.Entity, id ComponentId) error {
+func (s *defaultStore) Remove(e Entity, id ComponentId) error {
 	return s.containers[id].Remove(e)
 }
 
-func (s *defaultStore) RemoveAll(e entity.Entity) error {
+func (s *defaultStore) RemoveAll(e Entity) error {
 	for _, container := range s.containers {
 		err := container.Remove(e)
 		if err != nil {
@@ -82,11 +80,11 @@ func (s *defaultStore) RemoveAll(e entity.Entity) error {
 	return nil
 }
 
-func (s *defaultStore) Get(e entity.Entity, id ComponentId) (interface{}, error) {
+func (s *defaultStore) Get(e Entity, id ComponentId) (interface{}, error) {
 	return s.containers[id].Get(e)
 }
 
-func (s *defaultStore) GetAll(e entity.Entity) []interface{} {
+func (s *defaultStore) GetAll(e Entity) []interface{} {
 	components := make([]interface{}, 0)
 
 	for _, container := range s.containers {
@@ -99,6 +97,6 @@ func (s *defaultStore) GetAll(e entity.Entity) []interface{} {
 	return components
 }
 
-func (s *defaultStore) Has(e entity.Entity, id ComponentId) bool {
+func (s *defaultStore) Has(e Entity, id ComponentId) bool {
 	return s.containers[id].Has(e)
 }

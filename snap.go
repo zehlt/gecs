@@ -1,8 +1,4 @@
-package snapshot
-
-import (
-	"github.com/zehlt/gecs/entity"
-)
+package gecs
 
 // Add insert entity
 // Add Tag component
@@ -11,7 +7,7 @@ import (
 // Make sheduler working on new world without requiery
 
 type Couple struct {
-	E          entity.Entity
+	E          Entity
 	Components []interface{}
 }
 
