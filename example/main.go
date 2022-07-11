@@ -125,10 +125,10 @@ func main() {
 		sc2.Run(w2)
 	}
 
-	sc2.Signal(MovePlayerSignal{}, w2)
-	sc2.Signal(NothingSignal{}, w2)
-	sc2.Signal(MovePlayerSignal{}, w2)
-	sc2.Signal(MovePlayerSignal{}, w2)
-	sc2.Signal(HealUserSignal{}, w2)
-	sc2.Signal(MovePlayerSignal{}, w2)
+	// sc2.Signal(MovePlayerSignal{}, w2)
+	// sc2.Signal(NothingSignal{}, w2)
+	// sc2.Signal(MovePlayerSignal{}, w2)
+	// sc2.Signal(MovePlayerSignal{}, w2)
+	// sc2.Signal(HealUserSignal{}, w2)
+	// sc2.Signal(MovePlayerSignal{}, w2)
 }

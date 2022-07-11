@@ -5,7 +5,7 @@ import (
 )
 
 type System interface {
-	Init(qm QueryMaker) Query
+	Init() Args
 	Exec(cmd Controller, q Query)
 }
 
@@ -45,22 +45,21 @@ func (s *scheduler) AddReceiver(signal Receiver) {
 }
 
 func (s *scheduler) Signal(signal interface{}, w World) {
-	sign, ok := s.signals[reflect.TypeOf(signal)]
-	ctl := newController(w)
+	// sign, ok := s.signals[reflect.TypeOf(signal)]
+	// ctl := newController(w)
 
-	if ok {
-		sign.Exec(ctl, signal)
-	}
+	// if ok {
+	// 	sign.Exec(ctl, signal)
+	// }
 }
 
 // TODO: should optimize that
 func (s *scheduler) Run(w World) {
-	qm := NewQueryMaker(w)
 	ctl := newController(w)
 
 	for _, sys := range s.systems {
-		query := sys.Init(qm)
+		args := sys.Init()
+		query := w.Query(args)
 		sys.Exec(ctl, query)
-		ctl.Execute()
 	}
 }
