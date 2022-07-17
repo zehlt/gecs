@@ -1,41 +1,44 @@
 package gecs
 
+import (
+	"fmt"
+
+	"github.com/zehlt/datt"
+)
+
 type Controller interface {
 	CreateEntity() Entity
 	AddComponent(e Entity, comp interface{})
 	EmplaceComponent(e Entity, comp interface{})
 	DestroyEntity(e Entity)
+	Emit(t SignalType, data interface{})
 	Execute()
 }
 
 type command interface {
-	Execute(w World)
+	Execute(w World, s Scheduler)
 }
-
-// type destroyEntityCommand struct {
-// 	e Entity
-// }
-
-// func (c *destroyEntityCommand) Execute(w World) {
-// 	fmt.Println("DESTROY ENTITY!!")
-// 	w.DestroyEntity(c.e)
-// }
 
 type controller struct {
-	w World
-	// TODO: maybe switch from slice to queue
-	commands []command
+	w        World
+	s        Scheduler
+	commands datt.Queue[command]
 }
 
-func newController(w World) Controller {
+func newController(w World, s Scheduler) Controller {
 	return &controller{
+		s:        s,
 		w:        w,
-		commands: make([]command, 0),
+		commands: datt.NewQueue[command](),
 	}
 }
 
+func (c *controller) Emit(t SignalType, data interface{}) {
+	c.commands.Enqueue(&emitCommand{t: t, data: data})
+}
+
+// // TODO: should be done at the end of the stage
 func (c *controller) CreateEntity() Entity {
-	// TODO: should be done at the end of the stage
 	e, err := c.w.CreateEntity()
 	if err != nil {
 		panic(err)
@@ -45,35 +48,82 @@ func (c *controller) CreateEntity() Entity {
 }
 
 func (c *controller) AddComponent(e Entity, comp interface{}) {
-	err := c.w.AddComponent(e, comp)
-	if err != nil {
-		panic(err)
-	}
+	c.commands.Enqueue(&addComponentCommand{e: e, comp: comp})
 }
 
 func (c *controller) EmplaceComponent(e Entity, comp interface{}) {
-	err := c.w.EmplaceComponent(e, comp)
-	if err != nil {
-		panic(err)
-	}
+	c.commands.Enqueue(&emplaceComponentCommand{e: e, comp: comp})
+}
+
+func (c *controller) RemoveComponent(e Entity, comp interface{}) {
+	c.commands.Enqueue(&removeComponentCommand{e: e, comp: comp})
 }
 
 func (c *controller) DestroyEntity(e Entity) {
-	err := c.w.DestroyEntity(e)
-	if err != nil {
-		panic(err)
-	}
-	// c.commands = append(c.commands, &DestroyEntityCommand{e: e})
+	c.commands.Enqueue(&destroyEntityCommand{e: e})
 }
 
 func (c *controller) Execute() {
-	if len(c.commands) <= 0 {
+	if c.commands.IsEmpty() {
 		return
 	}
 
-	for _, cmd := range c.commands {
-		cmd.Execute(c.w)
+	len := c.commands.Length()
+	for i := 0; i < len; i++ {
+		cmd, err := c.commands.Dequeue()
+		if err != nil {
+			panic(err)
+		}
+		cmd.Execute(c.w, c.s)
 	}
+}
 
-	c.commands = make([]command, 0)
+type destroyEntityCommand struct {
+	e Entity
+}
+
+func (c *destroyEntityCommand) Execute(w World, s Scheduler) {
+	fmt.Println("DESTROY ENTITY!!")
+	w.DestroyEntity(c.e)
+}
+
+type emitCommand struct {
+	t    SignalType
+	data interface{}
+}
+
+func (c *emitCommand) Execute(w World, s Scheduler) {
+	fmt.Println("EMIT SIGNAL")
+	s.Emit(c.t, c.data)
+}
+
+type addComponentCommand struct {
+	e    Entity
+	comp interface{}
+}
+
+func (c *addComponentCommand) Execute(w World, s Scheduler) {
+	fmt.Println("ADD COMPONENT")
+	w.AddComponent(c.e, c.comp)
+}
+
+type emplaceComponentCommand struct {
+	e    Entity
+	comp interface{}
+}
+
+func (c *emplaceComponentCommand) Execute(w World, s Scheduler) {
+	fmt.Println("EMPLACE COMPONENT SIGNAL")
+	w.EmplaceComponent(c.e, c.comp)
+}
+
+type removeComponentCommand struct {
+	e    Entity
+	comp interface{}
+}
+
+func (c *removeComponentCommand) Execute(w World, s Scheduler) {
+	fmt.Println("REMOVE COMPONENT SIGNAL")
+
+	w.RemoveComponent(c.e, c.comp)
 }

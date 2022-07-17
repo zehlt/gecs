@@ -53,7 +53,6 @@ type KillPlayerSystem struct {
 }
 
 func (s *KillPlayerSystem) Init() gecs.Args {
-
 	return gecs.Args{
 		Access:   gecs.Access{&Life{}, &Player{}},
 		Exclude:  gecs.Exclude{},
@@ -68,7 +67,5 @@ func (s *KillPlayerSystem) Exec(cmd gecs.Controller, q gecs.Query) {
 		if player_life.HP < 0 {
 			cmd.DestroyEntity(e)
 		}
-
-		fmt.Println("PLAYER ALIVE")
 	})
 }

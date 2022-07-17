@@ -44,8 +44,8 @@ func main() {
 	world.RegisterComponent(&Position{}, gecs.SPARSE_ARRAY_CONTAINER)
 	world.RegisterComponent(&Speed{}, gecs.HASHMAP_CONTAINER)
 	world.RegisterComponent(&Life{}, gecs.HASHMAP_CONTAINER)
-	world.RegisterComponent(&Enemy{}, gecs.NULL_CONTAINER)
-	world.RegisterComponent(&Player{}, gecs.NULL_CONTAINER)
+	world.RegisterComponent(&Enemy{}, gecs.SPARSE_ARRAY_CONTAINER)
+	world.RegisterComponent(&Player{}, gecs.SPARSE_ARRAY_CONTAINER)
 
 	err := world.AddResource(Renderer{x: 12})
 	if err != nil {
@@ -92,6 +92,8 @@ func main() {
 	serial := gecs.NewSerializer()
 	serial.Register(&Position{})
 	serial.Register(&Speed{})
+	serial.Register(&Player{})
+	serial.Register(&Enemy{})
 	serial.Register(&Life{})
 
 	bytes, err := serial.Serialize(world)
@@ -113,22 +115,13 @@ func main() {
 		fmt.Println("c", cs)
 	}
 
-	sc2 := gecs.NewScheduler()
+	sc2 := gecs.NewScheduler(w2)
+	sc2.AddService(&UserService{})
 	sc2.AddSystem(&MoveSystem{})
 	sc2.AddSystem(&EnemyBarkSystem{})
 	sc2.AddSystem(&KillPlayerSystem{})
 
-	sc2.AddReceiver(&InputReceiver{})
-	sc2.AddReceiver(&HealUserReceiver{})
-
-	for i := 0; i < 10; i++ {
-		sc2.Run(w2)
+	for i := 0; i < 20; i++ {
+		sc2.Run()
 	}
-
-	// sc2.Signal(MovePlayerSignal{}, w2)
-	// sc2.Signal(NothingSignal{}, w2)
-	// sc2.Signal(MovePlayerSignal{}, w2)
-	// sc2.Signal(MovePlayerSignal{}, w2)
-	// sc2.Signal(HealUserSignal{}, w2)
-	// sc2.Signal(MovePlayerSignal{}, w2)
 }
