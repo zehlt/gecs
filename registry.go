@@ -18,6 +18,16 @@ func newSignature(size int) signature {
 	}
 }
 
+func matchSignature(sign signature, include signature, exclude signature) bool {
+	if sign.Contain(include) {
+		if sign.Crossing(exclude) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (s *signature) EmplaceComponent(t ComponentType) {
 	s.bitset.Set(int(t), true)
 }
@@ -36,6 +46,20 @@ func (s *signature) Contain(sign signature) bool {
 
 func (s *signature) Crossing(sign signature) bool {
 	return s.bitset.Crossing(sign.bitset)
+}
+
+func (s *signature) And(other signature) {
+	s.bitset.And(other.bitset)
+}
+
+func (s *signature) Or(other signature) {
+	s.bitset.Or(other.bitset)
+}
+
+func (s *signature) Clone() signature {
+	return signature{
+		bitset: s.bitset.Clone(),
+	}
 }
 
 type UID [16]byte
@@ -109,14 +133,17 @@ func (r *registry) HasComponent(e Entity, t ComponentType) bool {
 	return false
 }
 
-func (r *registry) getMatchingEntities(access signature, exclude signature) []Entity {
-	ents := []Entity{}
+func (r *registry) getSignature(e Entity) signature {
+	signature := r.entities[e]
+	return signature
+}
+
+func (r *registry) getMatchingEntities(read signature, exclude signature) map[Entity]any {
+	ents := make(map[Entity]any)
 
 	for e, sign := range r.entities {
-		if sign.Contain(access) {
-			if !sign.Crossing(exclude) {
-				ents = append(ents, e)
-			}
+		if matchSignature(sign, read, exclude) {
+			ents[e] = nil
 		}
 	}
 

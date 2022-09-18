@@ -3,7 +3,8 @@ module github.com/zehlt/gecs
 go 1.19
 
 require (
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/zehlt/datt v0.0.5 // indirect
-	golang.org/x/exp v0.0.0-20220827204233-334a2380cb91 // indirect
+	github.com/google/uuid v1.3.0
+	github.com/zehlt/datt v0.0.5
 )
+
+require golang.org/x/exp v0.0.0-20220827204233-334a2380cb91 // indirect

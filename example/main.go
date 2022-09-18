@@ -8,9 +8,17 @@ import (
 
 const (
 	PLAYER_COMPONENT gecs.ComponentType = iota
+	ENEMY_COMPONENT
 	VELOCITY_COMPONENT
 	POSITION_COMPONENT
 )
+
+type Enemy struct {
+}
+
+func (p Enemy) GetType() gecs.ComponentType {
+	return ENEMY_COMPONENT
+}
 
 type Player struct {
 }
@@ -38,56 +46,101 @@ func (p Velocity) GetType() gecs.ComponentType {
 
 func main() {
 	world := gecs.NewWorld()
-	err := world.RegisterComponent(PLAYER_COMPONENT, gecs.TAG_CONTAINER)
-	log.Println(err)
-	err = world.RegisterComponent(POSITION_COMPONENT, gecs.HASHMAP_CONTAINER)
-	log.Println(err)
-	err = world.RegisterComponent(VELOCITY_COMPONENT, gecs.HASHMAP_CONTAINER)
-	log.Println(err)
+	world.RegisterComponent(PLAYER_COMPONENT, gecs.TAG_CONTAINER)
+	world.RegisterComponent(ENEMY_COMPONENT, gecs.TAG_CONTAINER)
+	world.RegisterComponent(POSITION_COMPONENT, gecs.HASHMAP_CONTAINER)
+	world.RegisterComponent(VELOCITY_COMPONENT, gecs.HASHMAP_CONTAINER)
 
-	// e1 := world.CreateEntity()
-	// world.EmplaceComponent(e1, &Position{X: 100, Y: 1000})
+	scheduler := gecs.NewScheduler(world)
+	scheduler.AddStartupSystem(&CreateWorldStartup{})
+	scheduler.AddSystem(&MovementSystem{})
+	scheduler.AddSystem(&EnemySystem{})
+	scheduler.Build()
 
-	for i := 0; i < 100; i++ {
-		e2 := world.CreateEntity()
-		world.EmplaceComponent(e2, &Position{X: 200, Y: 2000})
-		world.EmplaceComponent(e2, &Velocity{D: 2222})
-	}
-
-	// scheduler := gecs.NewScheduler(world)
-	// scheduler.AddSystem(&MovementSystem{})
-
-	// scheduler.Init()
-	// scheduler.Step()
-	// scheduler.Step()
-	// scheduler.Step()
-	// scheduler.Dispose()
+	scheduler.Step()
+	scheduler.Step()
+	scheduler.Step()
+	scheduler.Dispose()
 }
 
 type MovementSystem struct {
 }
 
 func (s *MovementSystem) Init() gecs.Args {
-	log.Println("INIT MOVEMENT")
-
 	return gecs.Args{
-		Access:  []gecs.ComponentType{POSITION_COMPONENT, VELOCITY_COMPONENT},
+		Read:    []gecs.ComponentType{POSITION_COMPONENT},
+		Write:   []gecs.ComponentType{},
 		Exclude: []gecs.ComponentType{},
 	}
 }
 
-func (s *MovementSystem) Execute(cmd gecs.Command, q gecs.Query) {
-
+func (s *MovementSystem) Execute(cmd *gecs.Command, q gecs.Query) {
 	q.ForEach(func(e gecs.Entity) bool {
-		// pos := q.GetComponent(e, POSITION_COMPONENT).(*Position)
-		// log.Println(pos)
-		// vel := q.GetComponent(e, VELOCITY_COMPONENT).(*Velocity)
-		// log.Println(vel)
+		pos := q.GetComponent(e, POSITION_COMPONENT).(*Position)
+		log.Println("POS: ", pos)
 
 		return false
 	})
 }
 
 func (s *MovementSystem) Dispose() {
-	log.Println("DIPOSE MOVEMENT")
+}
+
+type PlayerSystem struct {
+}
+
+func (s *PlayerSystem) Init() gecs.Args {
+	return gecs.Args{
+		Read:    []gecs.ComponentType{PLAYER_COMPONENT},
+		Write:   []gecs.ComponentType{},
+		Exclude: []gecs.ComponentType{},
+	}
+}
+
+func (s *PlayerSystem) Execute(cmd *gecs.Command, q gecs.Query) {
+	q.ForEach(func(e gecs.Entity) bool {
+
+		return false
+	})
+}
+
+type EnemySystem struct {
+	once bool
+}
+
+func (s *EnemySystem) Init() gecs.Args {
+	return gecs.Args{
+		Read:    []gecs.ComponentType{ENEMY_COMPONENT},
+		Write:   []gecs.ComponentType{},
+		Exclude: []gecs.ComponentType{},
+	}
+}
+
+func (s *EnemySystem) Execute(cmd *gecs.Command, q gecs.Query) {
+	q.ForEach(func(e gecs.Entity) bool {
+		if !s.once {
+			cmd.DestroyEntity(e)
+			s.once = true
+			log.Println("destroy enemy called")
+		} else {
+			log.Println("ENEMY e:", e)
+		}
+		return false
+	})
+}
+
+func (s *EnemySystem) Dispose() {
+}
+
+type CreateWorldStartup struct {
+}
+
+func (s *CreateWorldStartup) Execute(cmd *gecs.Command) {
+	enemy := cmd.CreateEntity()
+	enemy.EmplaceComponent(Enemy{})
+	enemy.EmplaceComponent(&Position{X: 999, Y: 9999})
+
+	player := cmd.CreateEntity()
+	player.EmplaceComponent(Player{})
+	player.EmplaceComponent(&Position{X: 111, Y: 1111})
 }
