@@ -1,7 +1,9 @@
 module github.com/zehlt/gecs
 
-go 1.18
+go 1.19
 
-replace github.com/zehlt/datt => ../datt/
-
-require github.com/zehlt/datt v0.0.0-20220714170553-ab28691d3945 // indirect
+require (
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/zehlt/datt v0.0.5 // indirect
+	golang.org/x/exp v0.0.0-20220827204233-334a2380cb91 // indirect
+)

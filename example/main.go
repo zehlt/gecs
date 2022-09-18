@@ -1,127 +1,93 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/zehlt/gecs"
 )
+
+const (
+	PLAYER_COMPONENT gecs.ComponentType = iota
+	VELOCITY_COMPONENT
+	POSITION_COMPONENT
+)
+
+type Player struct {
+}
+
+func (p Player) GetType() gecs.ComponentType {
+	return PLAYER_COMPONENT
+}
 
 type Position struct {
 	X int
 	Y int
 }
 
-type Speed struct {
-	V float64
-	A float64
+func (p Position) GetType() gecs.ComponentType {
+	return POSITION_COMPONENT
 }
 
-type Life struct {
-	HP int
+type Velocity struct {
+	D int
 }
 
-type Enemy struct {
-}
-
-type Player struct {
-}
-
-func MyPrintln(x interface{}) {
-	fmt.Printf("t: %T, v: %v\n", x, x)
-}
-
-type TryInterface interface {
-	Try() bool
-}
-
-type Renderer struct {
-	x int
+func (p Velocity) GetType() gecs.ComponentType {
+	return VELOCITY_COMPONENT
 }
 
 func main() {
-	// // Testing
-	world := gecs.DefaultWorld()
-	world.RegisterComponent(&Position{}, gecs.SPARSE_ARRAY_CONTAINER)
-	world.RegisterComponent(&Speed{}, gecs.HASHMAP_CONTAINER)
-	world.RegisterComponent(&Life{}, gecs.HASHMAP_CONTAINER)
-	world.RegisterComponent(&Enemy{}, gecs.SPARSE_ARRAY_CONTAINER)
-	world.RegisterComponent(&Player{}, gecs.SPARSE_ARRAY_CONTAINER)
+	world := gecs.NewWorld()
+	err := world.RegisterComponent(PLAYER_COMPONENT, gecs.TAG_CONTAINER)
+	log.Println(err)
+	err = world.RegisterComponent(POSITION_COMPONENT, gecs.HASHMAP_CONTAINER)
+	log.Println(err)
+	err = world.RegisterComponent(VELOCITY_COMPONENT, gecs.HASHMAP_CONTAINER)
+	log.Println(err)
 
-	err := world.AddResource(Renderer{x: 12})
-	if err != nil {
-		panic(err)
+	// e1 := world.CreateEntity()
+	// world.EmplaceComponent(e1, &Position{X: 100, Y: 1000})
+
+	for i := 0; i < 100; i++ {
+		e2 := world.CreateEntity()
+		world.EmplaceComponent(e2, &Position{X: 200, Y: 2000})
+		world.EmplaceComponent(e2, &Velocity{D: 2222})
 	}
 
-	re, err := world.GetResource(Renderer{})
-	if err != nil {
-		panic(err)
+	// scheduler := gecs.NewScheduler(world)
+	// scheduler.AddSystem(&MovementSystem{})
+
+	// scheduler.Init()
+	// scheduler.Step()
+	// scheduler.Step()
+	// scheduler.Step()
+	// scheduler.Dispose()
+}
+
+type MovementSystem struct {
+}
+
+func (s *MovementSystem) Init() gecs.Args {
+	log.Println("INIT MOVEMENT")
+
+	return gecs.Args{
+		Access:  []gecs.ComponentType{POSITION_COMPONENT, VELOCITY_COMPONENT},
+		Exclude: []gecs.ComponentType{},
 	}
-	fmt.Println("ress", re)
+}
 
-	e1, err := world.CreateEntity()
-	if err != nil {
-		panic(err)
-	}
+func (s *MovementSystem) Execute(cmd gecs.Command, q gecs.Query) {
 
-	e2, err := world.CreateEntity()
-	if err != nil {
-		panic(err)
-	}
+	q.ForEach(func(e gecs.Entity) bool {
+		// pos := q.GetComponent(e, POSITION_COMPONENT).(*Position)
+		// log.Println(pos)
+		// vel := q.GetComponent(e, VELOCITY_COMPONENT).(*Velocity)
+		// log.Println(vel)
 
-	e3, err := world.CreateEntity()
-	if err != nil {
-		panic(err)
-	}
+		return false
+	})
+}
 
-	world.AddComponent(e1, &Position{X: 10, Y: 10})
-	world.AddComponent(e1, &Speed{V: 100, A: 1000})
-	world.AddComponent(e1, &Life{HP: 100})
-	world.AddComponent(e1, &Player{})
-
-	world.AddComponent(e2, &Enemy{})
-	world.AddComponent(e2, &Position{X: 20, Y: 20})
-	world.AddComponent(e2, &Life{HP: 200})
-	world.AddComponent(e2, &Speed{V: 200, A: 2000})
-
-	world.AddComponent(e3, &Enemy{})
-	world.AddComponent(e3, &Position{X: 30, Y: 30})
-	world.AddComponent(e3, &Life{HP: 300})
-	world.AddComponent(e3, &Speed{V: 300, A: 3000})
-
-	fmt.Println("--- SERIALIZE ---")
-	serial := gecs.NewSerializer()
-	serial.Register(&Position{})
-	serial.Register(&Speed{})
-	serial.Register(&Player{})
-	serial.Register(&Enemy{})
-	serial.Register(&Life{})
-
-	bytes, err := serial.Serialize(world)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(bytes)
-
-	fmt.Println("--- DESERIALIZE ---")
-	w2, err := serial.Deserialize(bytes)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(w2)
-
-	ents := w2.GetAllEntities()
-	for _, e := range ents {
-		cs, _ := w2.GetAllComponentsFromEntity(e)
-		fmt.Println("c", cs)
-	}
-
-	sc2 := gecs.NewScheduler(w2)
-	sc2.AddService(&UserService{})
-	sc2.AddSystem(&MoveSystem{})
-	sc2.AddSystem(&EnemyBarkSystem{})
-	sc2.AddSystem(&KillPlayerSystem{})
-
-	for i := 0; i < 20; i++ {
-		sc2.Run()
-	}
+func (s *MovementSystem) Dispose() {
+	log.Println("DIPOSE MOVEMENT")
 }

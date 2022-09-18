@@ -1,136 +1,136 @@
 package gecs
 
 import (
-	"errors"
-	"reflect"
+	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/zehlt/datt"
 )
 
-var (
-	ErrEntityAlreadyHasSignature  = errors.New("entity already has a signature")
-	ErrEntityDoesNotHaveSignature = errors.New("entity does not have a signature")
-)
-
-type registry interface {
-	CreateEntitySignature(Entity) error
-	GetEntitySignature(Entity) (Signature, error)
-	DestroyEntitySignature(Entity) error
-
-	AddComponent(Entity, ComponentId) error
-	RemoveComponent(Entity, ComponentId) error
-	HasComponent(Entity, ComponentId) bool
-	GetComponentId(c interface{}) ComponentId
-
-	GetSignatureFromTypes([]interface{}) Signature
-	FindMatchingEntities(Signature) []Entity
+type signature struct {
+	bitset *datt.Bitset
 }
 
-type defaultRegistry struct {
-	signatures map[Entity]Signature
-
-	types   map[reflect.Type]ComponentId
-	next_id ComponentId
-}
-
-func newRegistry() registry {
-	return &defaultRegistry{
-		signatures: make(map[Entity]Signature),
-		types:      make(map[reflect.Type]ComponentId),
-		next_id:    0,
+func newSignature(size int) signature {
+	bit, _ := datt.NewBitset(size)
+	return signature{
+		bitset: bit,
 	}
 }
 
-func (r *defaultRegistry) CreateEntitySignature(e Entity) error {
-	_, ok := r.signatures[e]
+func (s *signature) EmplaceComponent(t ComponentType) {
+	s.bitset.Set(int(t), true)
+}
+
+func (s *signature) RemoveComponent(t ComponentType) {
+	s.bitset.Set(int(t), false)
+}
+
+func (s *signature) HasComponent(t ComponentType) bool {
+	return s.bitset.Get(int(t))
+}
+
+func (s *signature) Contain(sign signature) bool {
+	return s.bitset.Contain(sign.bitset)
+}
+
+func (s *signature) Crossing(sign signature) bool {
+	return s.bitset.Crossing(sign.bitset)
+}
+
+type UID [16]byte
+
+type Entity struct {
+	uid UID
+}
+
+type registry struct {
+	entities    map[Entity]signature
+	biggestType int
+}
+
+func newRegistry() *registry {
+	return &registry{
+		entities: make(map[Entity]signature),
+	}
+}
+
+func (r *registry) RegisterComponent(t ComponentType) {
+	currentType := int(t)
+
+	if currentType > r.biggestType {
+		r.biggestType = currentType
+	}
+}
+
+func (r *registry) CreateEntity() Entity {
+	e := Entity{
+		uid: UID(uuid.New()),
+	}
+
+	r.entities[e] = newSignature(r.biggestType + 1)
+	return e
+}
+
+func (r *registry) DestroyEntity(e Entity) error {
+	_, ok := r.entities[e]
+	if !ok {
+		return fmt.Errorf("entity not registered")
+	}
+
+	delete(r.entities, e)
+	return nil
+}
+
+func (r *registry) EmplaceComponent(e Entity, t ComponentType) error {
+	signature, ok := r.entities[e]
+	if !ok {
+		return fmt.Errorf("entity not registered")
+	}
+
+	signature.EmplaceComponent(t)
+	return nil
+}
+
+func (r *registry) RemoveComponent(e Entity, t ComponentType) error {
+	signature, ok := r.entities[e]
+	if !ok {
+		return fmt.Errorf("entity not registered")
+	}
+	signature.RemoveComponent(t)
+	return nil
+}
+
+func (r *registry) HasComponent(e Entity, t ComponentType) bool {
+	signature, ok := r.entities[e]
 	if ok {
-		return ErrEntityAlreadyHasSignature
+		return signature.HasComponent(t)
 	}
-
-	r.signatures[e] = NewSignature()
-
-	return nil
+	return false
 }
 
-func (r *defaultRegistry) GetEntitySignature(e Entity) (Signature, error) {
-	sign, ok := r.signatures[e]
-	if !ok {
-		return nil, ErrEntityDoesNotHaveSignature
-	}
+func (r *registry) getMatchingEntities(access signature, exclude signature) []Entity {
+	ents := []Entity{}
 
-	return sign, nil
-}
-
-func (r *defaultRegistry) DestroyEntitySignature(e Entity) error {
-	_, ok := r.signatures[e]
-	if !ok {
-		return ErrEntityDoesNotHaveSignature
-	}
-	delete(r.signatures, e)
-
-	return nil
-}
-
-func (r *defaultRegistry) AddComponent(e Entity, id ComponentId) error {
-	sign, ok := r.signatures[e]
-	if !ok {
-		return ErrEntityDoesNotHaveSignature
-	}
-
-	sign.AddComponent(id)
-	return nil
-}
-
-func (r *defaultRegistry) RemoveComponent(e Entity, id ComponentId) error {
-	sign, ok := r.signatures[e]
-	if !ok {
-		return ErrEntityDoesNotHaveSignature
-	}
-
-	sign.RemoveComponent(id)
-
-	return nil
-}
-
-func (r *defaultRegistry) HasComponent(e Entity, id ComponentId) bool {
-	sign, ok := r.signatures[e]
-	if !ok {
-		return false
-	}
-
-	return sign.HasComponent(id)
-}
-
-func (r *defaultRegistry) GetComponentId(c interface{}) ComponentId {
-	t := reflect.TypeOf(c)
-
-	id, ok := r.types[t]
-	if !ok {
-		r.types[t] = r.next_id
-		r.next_id++
-		id = r.next_id - 1
-	}
-
-	return id
-}
-
-func (r *defaultRegistry) GetSignatureFromTypes(types []interface{}) Signature {
-	sign := NewSignature()
-
-	for _, t := range types {
-		id := r.GetComponentId(t)
-		sign.AddComponent(id)
-	}
-
-	return sign
-}
-
-func (r *defaultRegistry) FindMatchingEntities(matcher Signature) []Entity {
-	entities := make([]Entity, 0)
-
-	for e, s := range r.signatures {
-		if s.Contains(matcher) {
-			entities = append(entities, e)
+	for e, sign := range r.entities {
+		if sign.Contain(access) {
+			if !sign.Crossing(exclude) {
+				ents = append(ents, e)
+			}
 		}
 	}
 
-	return entities
+	return ents
+}
+
+func (r *registry) newSignatureFromTypes(types []ComponentType) signature {
+	bitset, _ := datt.NewBitset(r.biggestType + 1)
+
+	for _, t := range types {
+		bitset.Set(int(t), true)
+	}
+
+	return signature{
+		bitset: bitset,
+	}
 }
